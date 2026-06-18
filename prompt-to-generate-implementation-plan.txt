@@ -1,0 +1,609 @@
+# ROLE
+
+You are an elite team composed of:
+
+* Google ADK 2.0 Architect
+* Google Developer Expert (GenAI)
+* Kaggle Grandmaster
+* Multi-Agent Systems Researcher
+* AI Security Engineer
+* Distributed Systems Architect
+* Startup CTO
+* Product Strategist
+* Competition Judge
+* Technical Writer
+
+You have won multiple AI competitions and understand exactly how judges evaluate projects.
+
+Your mission is not to build a prototype.
+
+Your mission is to maximize the probability of winning the Kaggle × Google Gen AI Agent Capstone Competition.
+
+---
+
+# PROJECT
+
+Build:
+
+# EcoFlow — Federated Supply Chain Decarbonization & CBAM Auditor
+
+---
+
+# PRIMARY OBJECTIVE
+
+Create the most complete and detailed implementation blueprint possible.
+
+The blueprint must be so detailed that a developer can build the entire project end-to-end without making major architectural decisions.
+
+The output should function as:
+
+* Technical specification
+* Product requirements document
+* System architecture guide
+* Engineering playbook
+* Development roadmap
+* AI-assisted coding workflow
+* Demo strategy
+* Kaggle submission strategy
+* Competition-winning guide
+
+---
+
+# IMPORTANT STRATEGIC RULE
+
+Do NOT optimize for simplicity.
+
+Do NOT optimize for beginner friendliness.
+
+Do NOT optimize for easiest implementation.
+
+Optimize for:
+
+1. Maximum probability of winning
+2. Maximum judge impact
+3. Maximum technical depth
+4. Maximum innovation
+5. Maximum use of technologies taught in the competition
+6. Maximum demonstration of agentic workflows
+7. Maximum differentiation from other submissions
+8. Strong demo narrative
+9. Strong writeup quality
+10. Realistic completion within competition constraints
+
+Whenever there is a tradeoff between:
+
+* Easy vs Impressive
+
+Choose:
+
+* Impressive
+
+Unless the impressive solution cannot realistically be completed within the competition timeline.
+
+---
+
+# COMPETITION ALIGNMENT REQUIREMENT
+
+Before designing the solution:
+
+Analyze which technologies, frameworks, concepts, and architectural patterns are most aligned with the competition.
+
+The implementation MUST prioritize and incorporate every relevant competition technology that increases winning probability.
+
+Examples include (but are not limited to):
+
+* Google ADK 2.0
+* A2A Protocol
+* FastMCP
+* Gemini
+* Cloud Run
+* Vertex AI
+* Agent Memory
+* Multi-Agent Orchestration
+* Agent-to-Agent Communication
+* Tool Calling
+* Structured Outputs
+* Dynamic Workflows
+* Human-in-the-Loop Workflows
+* Long-Term Memory
+* Evaluation Frameworks
+* Agent Observability
+* Event-Driven Architectures
+
+If a technology meaningfully increases competition score, include it.
+
+If a technology is unnecessary, explain why it should be excluded.
+
+For every technology selected:
+
+Explain:
+
+* Why it helps win
+* What judges will notice
+* How it improves scoring
+* How it should be implemented
+
+---
+
+# FIRST TASK
+
+Before writing the implementation plan:
+
+Create a section called:
+
+# Winning Strategy Analysis
+
+Analyze:
+
+### Why EcoFlow was selected
+
+### What judges care about
+
+### What judges ignore
+
+### What typical teams will build
+
+### How to stand out
+
+### How to beat the average submission
+
+### How to beat the top 10%
+
+### How to maximize award probability
+
+### What would make this project memorable
+
+### What would make judges discuss it after judging
+
+### What would make this project look like a winning submission
+
+---
+
+# DELIVERABLE FORMAT
+
+Generate a COMPLETE markdown implementation guide.
+
+The guide must exceed the depth and quality of a professional technical design document.
+
+---
+
+# REQUIRED SECTIONS
+
+## 1. Executive Summary
+
+Explain:
+
+* Problem
+* Opportunity
+* Why this project matters
+* Why it can win
+* Key differentiators
+
+---
+
+## 2. Winning Strategy Analysis
+
+Deep competition analysis.
+
+Judge psychology.
+
+Scoring optimization.
+
+Common mistakes.
+
+Differentiation strategy.
+
+---
+
+## 3. Architecture Overview
+
+Create:
+
+### System Architecture
+
+### Agent Architecture
+
+### Infrastructure Architecture
+
+### Deployment Architecture
+
+### Data Flow Architecture
+
+Use Mermaid diagrams.
+
+Use multiple diagrams.
+
+---
+
+## 4. Technology Selection Matrix
+
+For every technology:
+
+Include:
+
+* Why selected
+* Why not selected
+* Impact on score
+* Complexity
+* Risk
+* Expected judge reaction
+
+---
+
+## 5. Agent System Design
+
+Design the strongest possible agent architecture.
+
+For each agent provide:
+
+### Purpose
+
+### Responsibilities
+
+### Inputs
+
+### Outputs
+
+### Memory
+
+### Tools
+
+### Workflow
+
+### Failure Recovery
+
+### Evaluation Criteria
+
+### Prompt Template
+
+### System Prompt
+
+### Examples
+
+Provide production-grade prompts.
+
+---
+
+## 6. A2A Implementation
+
+Create a complete implementation guide.
+
+Include:
+
+* Architecture
+* Message schemas
+* Registration
+* Discovery
+* Security
+* Communication flow
+* Error handling
+* Observability
+
+Explain exactly how judges can see A2A working during the demo.
+
+---
+
+## 7. FastMCP Design
+
+Create multiple MCP servers.
+
+Explain:
+
+* Why each exists
+* What tools it exposes
+* How agents use it
+* How it contributes to scoring
+
+Include implementation examples.
+
+---
+
+## 8. Data Strategy
+
+Provide:
+
+### Real datasets
+
+### Public datasets
+
+### Mock datasets
+
+### Carbon emission factors
+
+### CBAM datasets
+
+### Supplier datasets
+
+### Regulatory datasets
+
+Explain exactly:
+
+* What to use
+* What to simulate
+* What to avoid
+
+---
+
+## 9. Repository Structure
+
+Generate a complete production-grade repository structure.
+
+Explain every directory.
+
+Explain every file.
+
+---
+
+## 10. Database Design
+
+Include:
+
+### Schemas
+
+### Tables
+
+### Relationships
+
+### Indexing
+
+### Storage Strategy
+
+---
+
+## 11. API Design
+
+Include:
+
+### REST APIs
+
+### MCP APIs
+
+### A2A APIs
+
+### Agent APIs
+
+### Request/Response Examples
+
+---
+
+## 12. Frontend Design
+
+Create:
+
+### Dashboard
+
+### Carbon Intelligence View
+
+### Supplier Network View
+
+### CBAM Audit View
+
+### Agent Activity View
+
+### A2A Communication Visualization
+
+### Judge Demo View
+
+Explain UI decisions.
+
+---
+
+## 13. AI-Assisted Development Workflow
+
+Assume development uses:
+
+* Cursor
+* Gemini CLI
+* Claude Code
+* Any AI IDE required
+
+For every feature:
+
+Generate exact prompts.
+
+Include:
+
+### Code Generation Prompts
+
+### Architecture Prompts
+
+### Debugging Prompts
+
+### Refactoring Prompts
+
+### Testing Prompts
+
+### Documentation Prompts
+
+### Performance Optimization Prompts
+
+Prompts must be copy-paste ready.
+
+---
+
+## 14. Day-by-Day Execution Plan
+
+Create:
+
+### Day 1
+
+### Day 2
+
+### Day 3
+
+### Day 4
+
+### Day 5
+
+For each:
+
+* Tasks
+* Deliverables
+* Success criteria
+* Risks
+* Fallback plans
+
+---
+
+## 15. Testing Strategy
+
+Include:
+
+### Unit Testing
+
+### Integration Testing
+
+### Agent Testing
+
+### MCP Testing
+
+### A2A Testing
+
+### E2E Testing
+
+### Evaluation Framework
+
+### Benchmarking
+
+### Failure Simulations
+
+---
+
+## 16. Demo Strategy
+
+Create a demo specifically designed to impress judges.
+
+Include:
+
+### Demo Narrative
+
+### Demo Story
+
+### Demo Timeline
+
+### Talking Points
+
+### Visual Flow
+
+### Screens
+
+### Live Interactions
+
+### Fallback Demo
+
+### Offline Backup
+
+### Judge Questions & Answers
+
+---
+
+## 17. Kaggle Submission Strategy
+
+Generate:
+
+### README Structure
+
+### Notebook Structure
+
+### Architecture Diagrams
+
+### Screenshots
+
+### GIF Strategy
+
+### Video Walkthrough
+
+### Submission Packaging
+
+### Judge-Oriented Storytelling
+
+---
+
+## 18. Documentation Plan
+
+Create:
+
+* README
+* Architecture Guide
+* Deployment Guide
+* User Guide
+* Technical Deep Dive
+* Design Decisions
+* Lessons Learned
+
+---
+
+## 19. Risk Analysis
+
+Identify:
+
+* Technical risks
+* Competition risks
+* Time risks
+* Demo risks
+* Infrastructure risks
+
+Provide mitigation plans.
+
+---
+
+## 20. Winning Enhancements
+
+Categorize:
+
+### Must Have
+
+### Should Have
+
+### Nice To Have
+
+### Stretch Goals
+
+For each:
+
+* Impact
+* Difficulty
+* Time
+* Judge Value
+
+---
+
+## 21. Final Winning Roadmap
+
+Create:
+
+### Minimum Viable Submission
+
+### Strong Submission
+
+### Top 10% Submission
+
+### Finalist Submission
+
+### Likely Winner Submission
+
+Explain exactly what differentiates each level.
+
+---
+
+# OUTPUT QUALITY REQUIREMENTS
+
+The output must:
+
+* Be extremely detailed
+* Contain no placeholders
+* Include real implementation recommendations
+* Include architecture diagrams
+* Include folder structures
+* Include code examples
+* Include prompt templates
+* Include deployment instructions
+* Include testing plans
+* Include competition strategy
+* Include judge psychology analysis
+* Include technical tradeoffs
+* Include fallback options
+
+Assume this document is the single source of truth for building a competition-winning project.
+
+Your goal is to produce the highest probability path to winning the competition, not merely completing the project.

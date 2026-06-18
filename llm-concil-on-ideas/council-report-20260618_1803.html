@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LLM Council Report — Kaggle × Google Gen AI Agent Capstone</title>
+<style>
+  * {box-sizing:border-box;margin:0;padding:0}
+  body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;color:#1e293b;line-height:1.5}
+  .container {max-width:900px;margin:0 auto;padding:24px 20px}
+  details summary::-webkit-details-marker {display:none}
+  details[open] summary {border-radius:10px 10px 0 0}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div style="background:linear-gradient(135deg,#1e293b 0%,#334155 100%);color:#fff;padding:32px;border-radius:16px;margin-bottom:28px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#94a3b8;margin-bottom:8px">LLM Council Report</div>
+    <h1 style="font-size:22px;font-weight:800;margin-bottom:8px;line-height:1.3">Kaggle × Google 5-Day Gen AI Agent<br>Capstone Project Evaluation</h1>
+    <p style="color:#94a3b8;font-size:14px">5 independent advisors · Peer review · Chairman synthesis · June 18, 2026</p>
+    <div style="margin-top:20px;padding:16px;background:rgba(255,255,255,0.06);border-radius:10px;border-left:4px solid #6366f1">
+      <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:#94a3b8;margin-bottom:6px">The Question</div>
+      <p style="color:#e2e8f0;font-size:14px;line-height:1.6">Which of 6 capstone project ideas is most likely to win an award in the Kaggle × Google 5-Day Gen AI Agent course competition? Evaluated by a panel simulating AI researchers, Google/Kaggle mentors, product managers, startup founders, and ML engineers.</p>
+    </div>
+  </div>
+
+  <!-- CHAIRMAN VERDICT SUMMARY -->
+  <div style="background:#fff;border:2px solid #6366f1;border-radius:16px;padding:28px;margin-bottom:28px;box-shadow:0 4px 16px rgba(99,102,241,0.1)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+      <span style="font-size:20px">⚖️</span>
+      <h2 style="font-size:18px;font-weight:800;color:#1e293b">Chairman's Verdict</h2>
+      <span style="margin-left:auto;font-size:12px;color:#94a3b8;background:#f1f5f9;padding:4px 10px;border-radius:999px">Final Synthesis</span>
+    </div>
+    
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:18px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">🏆 Single Strongest Project</div>
+      <p style="font-size:20px;font-weight:800;color:#166534;margin-bottom:6px">EcoFlow — Federated Supply Chain Decarbonization & CBAM Auditor</p>
+      <p style="font-size:14px;color:#15803d;line-height:1.6">The only project uniquely implementing A2A protocol — the most advanced capability in the ADK 2.0 stack — solving a real, active 2026 regulatory requirement (CBAM), with a clean 4-agent architecture that can be fully documented in 5 days.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+      <div style="background:#eef2ff;border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:#4338ca;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Top 3 Most Likely to Win</div>
+        <ol style="font-size:14px;color:#3730a3;line-height:1.8;padding-left:18px">
+          <li><strong>EcoFlow</strong> (Overall: 87/100)</li>
+          <li><strong>CogniTrial</strong> (Overall: 84/100)</li>
+          <li><strong>SentinelNet</strong> (Overall: 82/100)</li>
+        </ol>
+      </div>
+      <div style="background:#fef2f2;border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Ideas to Avoid</div>
+        <ol style="font-size:14px;color:#7f1d1d;line-height:1.8;padding-left:18px">
+          <li><strong>EpiGuardian</strong> — saturated domain, weak architecture</li>
+          <li><strong>CyberSentinel</strong> — ToS risks, demo impossible in 5d</li>
+          <li><strong>PyroShield</strong> — data pipeline is a 5-day blocker</li>
+        </ol>
+      </div>
+    </div>
+
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">⚡ The One Thing To Do First</div>
+      <p style="font-size:14px;color:#78350f;line-height:1.6">Download and read the ADK 2.0 A2A quickstart guide (adk.dev/a2a/quickstart-exposing/) TODAY. If you can spin up two local A2A-communicating agents by end of Day 1, build EcoFlow. If the A2A setup takes more than 4 hours, pivot to CogniTrial.</p>
+    </div>
+
+    <div style="background:#f8fafc;border-radius:10px;padding:16px">
+      <div style="font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">📋 Full Recommendation</div>
+      <p style="font-size:14px;color:#334155;line-height:1.6">Build EcoFlow. It is the only project that (a) uses A2A protocol — the most advanced and course-specific capability, (b) solves a real, active regulatory problem (CBAM 2026 compliance), (c) has an architecturally clean 4-agent design that can be documented well, and (d) fakes nothing — you simulate both sides of the supplier network intentionally and that's architecturally honest. If EcoFlow is too risky or the builder lacks the A2A background, CogniTrial is the backup: more feasible, more verifiable, and uniquely novel in its adversarial self-testing loop.</p>
+    </div>
+  </div>
+
+  <!-- WHERE COUNCIL AGREES / CLASHES -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px">
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:22px">
+      <h3 style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:14px">✅ Where the Council Agrees</h3>
+      <div style="display:flex;gap:10px;margin-bottom:12px"><span style="color:#10b981;font-size:16px;flex-shrink:0;margin-top:2px">•</span><p style="font-size:13px;color:#334155;line-height:1.6">Ideas 4-6 (CogniTrial, EcoFlow, SentinelNet) are categorically stronger than Ideas 1-3 (PyroShield, EpiGuardian, CyberSentinel) because they use the specific Google Agent Stack taught in the course — ADK 2.0, A2A protocol, FastMCP, Antigravity 2.0, Cloud Run. This alignment is the single most important differentiator for a course-specific competition.</p></div><div style="display:flex;gap:10px;margin-bottom:12px"><span style="color:#10b981;font-size:16px;flex-shrink:0;margin-top:2px">•</span><p style="font-size:13px;color:#334155;line-height:1.6">PyroShield has severe data pipeline feasibility problems — Google Earth Engine OAuth, real satellite imagery preprocessing, and NOAA API integration are multi-day blockers that will force the team to mock everything, which judges can detect.</p></div><div style="display:flex;gap:10px;margin-bottom:12px"><span style="color:#10b981;font-size:16px;flex-shrink:0;margin-top:2px">•</span><p style="font-size:13px;color:#334155;line-height:1.6">EpiGuardian and CyberSentinel are the weakest of the six. EpiGuardian's 5-agent architecture doesn't justify its complexity when the core output is a dashboard and alert messages. CyberSentinel faces Terms of Service risks on Kaggle and its 'autonomous remediation' claim is impossible to demonstrate safely in 5 days.</p></div><div style="display:flex;gap:10px;margin-bottom:12px"><span style="color:#10b981;font-size:16px;flex-shrink:0;margin-top:2px">•</span><p style="font-size:13px;color:#334155;line-height:1.6">CogniTrial is the most feasible project with the most verifiable output. Clinical trial protocols from ClinicalTrials.gov are public domain, FDA/EMA guidelines are downloadable text, and the correction loop produces a measurable compliance score — a number judges can see improve in real-time.</p></div>
+    </div>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:22px">
+      <h3 style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:14px">⚡ Where the Council Clashes</h3>
+      <div style="background:#fef9c3;border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:#713f12;margin-bottom:4px">DEMO EMOTIONAL RESONANCE VS. TECHNICAL CREDIBILITY</div><p style="font-size:12px;color:#78350f;margin-bottom:6px"><strong>Camp A:</strong> The Outsider argues PyroShield ranks first because wildfire maps are viscerally compelling to any judge, technical or not.</p><p style="font-size:12px;color:#78350f;margin-bottom:6px"><strong>Camp B:</strong> The First Principles Thinker and Executor argue that THIS specific competition's judges are technical, and PyroShield's plumbing will be seen through immediately.</p><p style="font-size:12px;color:#451a03"><strong>Resolution:</strong> The Executor and First Principles Thinker win this clash. The judging criteria explicitly include 'effective use of agentic workflows' and 'technical depth.' PyroShield's emotional resonance doesn't compensate for mocked data and shallow agent architecture.</p></div><div style="background:#fef9c3;border-radius:8px;padding:12px;margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:#713f12;margin-bottom:4px">SENTINELNET: RESEARCH PAPER OR DEMO DISASTER?</div><p style="font-size:12px;color:#78350f;margin-bottom:6px"><strong>Camp A:</strong> The Expansionist argues SentinelNet is a conference talk dressed as a capstone — the meta-framing of 'AI hacking AI' is the most intellectually exciting idea.</p><p style="font-size:12px;color:#78350f;margin-bottom:6px"><strong>Camp B:</strong> The Contrarian warns that proving the patching agent actually fixed a vulnerability in a 5-minute demo is nearly impossible to do convincingly without a contrived setup.</p><p style="font-size:12px;color:#451a03"><strong>Resolution:</strong> Both are right in different ways. SentinelNet has the highest ceiling and the most genuine innovation. But the demo risk is real. It ranks 3rd — better than the bottom three, but riskier than CogniTrial and EcoFlow.</p></div>
+    </div>
+  </div>
+
+  <!-- BLIND SPOTS -->
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:22px;margin-bottom:28px">
+    <h3 style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:14px">🔍 Blind Spots the Council Caught</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="background:#eef2ff;border-radius:8px;padding:12px"><p style="font-size:13px;color:#3730a3;line-height:1.6">Peer review caught the saturation risk: wildfire, pandemic, and cybersecurity are the FIRST ideas people generate in any AI agent competition. CogniTrial and EcoFlow are niche enough to avoid the crowded submission pile.</p></div><div style="background:#eef2ff;border-radius:8px;padding:12px"><p style="font-size:13px;color:#3730a3;line-height:1.6">EcoFlow's A2A supplier federation is deceptive-in-a-good-way: you control both sides of the network (your own local FastMCP servers simulate the suppliers), making the architecture LOOK more complex than it is to build. This dramatically increases feasibility.</p></div><div style="background:#eef2ff;border-radius:8px;padding:12px"><p style="font-size:13px;color:#3730a3;line-height:1.6">CogniTrial has a built-in objective metric: compliance score (e.g., 62% → 94% after the correction loop). Judges can see a number improve. Most other projects have qualitative outputs that are harder to evaluate fairly.</p></div><div style="background:#eef2ff;border-radius:8px;padding:12px"><p style="font-size:13px;color:#3730a3;line-height:1.6">The writeup quality factor: Kaggle judges read the notebook first. Projects with cleaner, smaller architectures (4 agents, not 5-6) have more time for polished documentation. EcoFlow and CogniTrial benefit from architectural clarity.</p></div>
+    </div>
+  </div>
+
+  <!-- AGREEMENT GRID -->
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:22px;margin-bottom:28px">
+    <h3 style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:16px">📊 Advisor Rankings Grid</h3>
+    
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+            <tr style="background:#f8fafc">
+                <th style="padding:10px 12px;text-align:left;color:#1e293b;font-size:13px;border-right:2px solid #e2e8f0">Project</th>
+                <th style="padding:8px;text-align:center;font-size:11px;color:#64748b;font-weight:600">Contrarian</th><th style="padding:8px;text-align:center;font-size:11px;color:#64748b;font-weight:600">Thinker</th><th style="padding:8px;text-align:center;font-size:11px;color:#64748b;font-weight:600">Expansionist</th><th style="padding:8px;text-align:center;font-size:11px;color:#64748b;font-weight:600">Outsider</th><th style="padding:8px;text-align:center;font-size:11px;color:#64748b;font-weight:600">Executor</th>
+                <th style="padding:8px;text-align:center;color:#1e293b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Avg Rank</th>
+            </tr>
+        </thead>
+        <tbody><tr>
+            <td style="padding:8px 12px;font-weight:600;color:#1e293b;border-right:2px solid #e2e8f0">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;margin-right:8px"></span>EcoFlow
+            </td>
+            <td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">2</td><td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">1</td><td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">2</td><td style="text-align:center;padding:8px;background:#fef9c3;color:#713f12;font-weight:700;font-size:14px">3</td><td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">2</td>
+            <td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:800;font-size:14px">2.0</td>
+        </tr><tr>
+            <td style="padding:8px 12px;font-weight:600;color:#1e293b;border-right:2px solid #e2e8f0">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6366f1;margin-right:8px"></span>CogniTrial
+            </td>
+            <td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">1</td><td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">2</td><td style="text-align:center;padding:8px;background:#fef9c3;color:#713f12;font-weight:700;font-size:14px">3</td><td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">5</td><td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">1</td>
+            <td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:800;font-size:14px">2.4</td>
+        </tr><tr>
+            <td style="padding:8px 12px;font-weight:600;color:#1e293b;border-right:2px solid #e2e8f0">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:8px"></span>SentinelNet
+            </td>
+            <td style="text-align:center;padding:8px;background:#fef9c3;color:#713f12;font-weight:700;font-size:14px">3</td><td style="text-align:center;padding:8px;background:#fef9c3;color:#713f12;font-weight:700;font-size:14px">3</td><td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">1</td><td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">2</td><td style="text-align:center;padding:8px;background:#fef9c3;color:#713f12;font-weight:700;font-size:14px">3</td>
+            <td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:800;font-size:14px">2.4</td>
+        </tr><tr>
+            <td style="padding:8px 12px;font-weight:600;color:#1e293b;border-right:2px solid #e2e8f0">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3b82f6;margin-right:8px"></span>PyroShield AI
+            </td>
+            <td style="text-align:center;padding:8px;background:#f1f5f9;color:#334155;font-weight:700;font-size:14px">4</td><td style="text-align:center;padding:8px;background:#f1f5f9;color:#334155;font-weight:700;font-size:14px">4</td><td style="text-align:center;padding:8px;background:#f1f5f9;color:#334155;font-weight:700;font-size:14px">4</td><td style="text-align:center;padding:8px;background:#dcfce7;color:#166534;font-weight:700;font-size:14px">1</td><td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">5</td>
+            <td style="text-align:center;padding:8px;background:#f1f5f9;color:#334155;font-weight:800;font-size:14px">3.6</td>
+        </tr><tr>
+            <td style="padding:8px 12px;font-weight:600;color:#1e293b;border-right:2px solid #e2e8f0">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ec4899;margin-right:8px"></span>CyberSentinel
+            </td>
+            <td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">5</td><td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">5</td><td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">6</td><td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">6</td><td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">6</td>
+            <td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:800;font-size:14px">5.6</td>
+        </tr><tr>
+            <td style="padding:8px 12px;font-weight:600;color:#1e293b;border-right:2px solid #e2e8f0">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;margin-right:8px"></span>EpiGuardian
+            </td>
+            <td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">6</td><td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">6</td><td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:700;font-size:14px">5</td><td style="text-align:center;padding:8px;background:#f1f5f9;color:#334155;font-weight:700;font-size:14px">4</td><td style="text-align:center;padding:8px;background:#f1f5f9;color:#334155;font-weight:700;font-size:14px">4</td>
+            <td style="text-align:center;padding:8px;background:#fee2e2;color:#991b1b;font-weight:800;font-size:14px">5.0</td>
+        </tr></tbody>
+    </table>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:#94a3b8">🟢 Top 2 rank &nbsp;|&nbsp; 🟡 3rd rank &nbsp;|&nbsp; ⬜ 4th rank &nbsp;|&nbsp; 🔴 Bottom 2 rank</div>
+  </div>
+
+  <!-- PROJECT RANKINGS -->
+  <div style="margin-bottom:28px">
+    <h2 style="font-size:18px;font-weight:800;color:#1e293b;margin-bottom:18px">🏆 Full Project Rankings</h2>
+    
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:20px;border-left:5px solid #10b981;box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <span style="font-size:28px">🥇</span>
+                    <div>
+                        <div style="font-size:18px;font-weight:700;color:#1e293b">Idea #5 — EcoFlow</div>
+                        <div style="font-size:13px;color:#64748b;margin-top:2px">Rank #1 of 6</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <div style="text-align:center">
+                        <div style="font-size:28px;font-weight:800;color:#10b981">87</div>
+                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">/100</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                        <div style="font-size:12px;color:#64748b">Award Potential: <span style="background:#10b981;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">HIGH</span></div>
+                        <div style="font-size:12px;color:#64748b">5-Day Feasibility: <span style="background:#10b981;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">HIGH</span></div>
+                    </div>
+                </div>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:16px;font-size:14px;color:#334155;line-height:1.6">
+                <strong>Verdict:</strong> EcoFlow wins because it uniquely implements the A2A protocol — the most advanced and newest capability in the ADK 2.0 stack, and the one most judges will be looking for. CBAM compliance is a real, active regulatory requirement in 2026. The federated supplier network is architecturally the most sophisticated of all six ideas, and the four-agent design is clean enough to document well. The A2A protocol implementation alone signals mastery of course-specific material that most submissions won't have.
+            </div>
+            <div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Innovation</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Feasibility (5d)</span><span style="font-weight:700;color:#f59e0b">7/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:70.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Agentic Workflows</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Real-World Impact</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Wow / Demo Factor</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Google Alignment</span><span style="font-weight:700;color:#10b981">10/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:100.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Scalability</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Standout Probability</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:20px;border-left:5px solid #6366f1;box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <span style="font-size:28px">🥈</span>
+                    <div>
+                        <div style="font-size:18px;font-weight:700;color:#1e293b">Idea #4 — CogniTrial</div>
+                        <div style="font-size:13px;color:#64748b;margin-top:2px">Rank #2 of 6</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <div style="text-align:center">
+                        <div style="font-size:28px;font-weight:800;color:#6366f1">84</div>
+                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">/100</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                        <div style="font-size:12px;color:#64748b">Award Potential: <span style="background:#10b981;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">HIGH</span></div>
+                        <div style="font-size:12px;color:#64748b">5-Day Feasibility: <span style="background:#10b981;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">HIGH</span></div>
+                    </div>
+                </div>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:16px;font-size:14px;color:#334155;line-height:1.6">
+                <strong>Verdict:</strong> CogniTrial is the most feasible AND most verifiable project. Public clinical trial data, downloadable regulatory guidelines, and a measurable compliance score (%) make it the only idea that produces an objectively assessable output. The adversarial simulator that stress-tests its own protocol is genuinely novel. The main weakness is domain opacity — judges unfamiliar with pharmaceutical research need a good writeup to understand why this matters.
+            </div>
+            <div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Innovation</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Feasibility (5d)</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Agentic Workflows</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Real-World Impact</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Wow / Demo Factor</span><span style="font-weight:700;color:#f59e0b">7/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:70.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Google Alignment</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Scalability</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Standout Probability</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:20px;border-left:5px solid #f59e0b;box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <span style="font-size:28px">🥉</span>
+                    <div>
+                        <div style="font-size:18px;font-weight:700;color:#1e293b">Idea #6 — SentinelNet</div>
+                        <div style="font-size:13px;color:#64748b;margin-top:2px">Rank #3 of 6</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <div style="text-align:center">
+                        <div style="font-size:28px;font-weight:800;color:#f59e0b">82</div>
+                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">/100</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                        <div style="font-size:12px;color:#64748b">Award Potential: <span style="background:#10b981;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">HIGH</span></div>
+                        <div style="font-size:12px;color:#64748b">5-Day Feasibility: <span style="background:#f59e0b;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">MEDIUM</span></div>
+                    </div>
+                </div>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:16px;font-size:14px;color:#334155;line-height:1.6">
+                <strong>Verdict:</strong> SentinelNet has the most genuine innovation of all six ideas — a meta-level system where agents autonomously test and patch other agents. This is publishable research territory. The demo risk is real but manageable: you control both the attacking and defending agents, so you can script the attack vectors. The main risk is convincing judges the patching is real and not contrived. If the demo lands, this wins. If the demo confuses judges, it falls to 4th.
+            </div>
+            <div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Innovation</span><span style="font-weight:700;color:#10b981">10/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:100.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Feasibility (5d)</span><span style="font-weight:700;color:#f59e0b">6/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:60.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Agentic Workflows</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Real-World Impact</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Wow / Demo Factor</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Google Alignment</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Scalability</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Standout Probability</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:20px;border-left:5px solid #3b82f6;box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <span style="font-size:28px">4️⃣</span>
+                    <div>
+                        <div style="font-size:18px;font-weight:700;color:#1e293b">Idea #1 — PyroShield AI</div>
+                        <div style="font-size:13px;color:#64748b;margin-top:2px">Rank #4 of 6</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <div style="text-align:center">
+                        <div style="font-size:28px;font-weight:800;color:#3b82f6">68</div>
+                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">/100</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                        <div style="font-size:12px;color:#64748b">Award Potential: <span style="background:#f59e0b;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">MEDIUM</span></div>
+                        <div style="font-size:12px;color:#64748b">5-Day Feasibility: <span style="background:#ef4444;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">LOW</span></div>
+                    </div>
+                </div>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:16px;font-size:14px;color:#334155;line-height:1.6">
+                <strong>Verdict:</strong> PyroShield is emotionally compelling and has a vivid demo scenario, but the data pipeline is the project's undoing. Real satellite imagery and NOAA APIs create multi-day blockers. You'll end up with synthetic data, which judges will notice. The agent architecture (5 agents) is sound but not course-stack-specific enough. Could rank higher with 2 more weeks of development. In 5 days, it's a risk.
+            </div>
+            <div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Innovation</span><span style="font-weight:700;color:#f59e0b">7/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:70.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Feasibility (5d)</span><span style="font-weight:700;color:#ef4444">4/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:40.0%;height:100%;background:#ef4444;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Agentic Workflows</span><span style="font-weight:700;color:#f59e0b">7/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:70.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Real-World Impact</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Wow / Demo Factor</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Google Alignment</span><span style="font-weight:700;color:#f59e0b">6/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:60.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Scalability</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Standout Probability</span><span style="font-weight:700;color:#ef4444">5/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:50.0%;height:100%;background:#ef4444;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:20px;border-left:5px solid #ec4899;box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <span style="font-size:28px">5️⃣</span>
+                    <div>
+                        <div style="font-size:18px;font-weight:700;color:#1e293b">Idea #3 — CyberSentinel</div>
+                        <div style="font-size:13px;color:#64748b;margin-top:2px">Rank #5 of 6</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <div style="text-align:center">
+                        <div style="font-size:28px;font-weight:800;color:#ec4899">62</div>
+                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">/100</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                        <div style="font-size:12px;color:#64748b">Award Potential: <span style="background:#f59e0b;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">MEDIUM</span></div>
+                        <div style="font-size:12px;color:#64748b">5-Day Feasibility: <span style="background:#ef4444;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">LOW</span></div>
+                    </div>
+                </div>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:16px;font-size:14px;color:#334155;line-height:1.6">
+                <strong>Verdict:</strong> CyberSentinel solves an important problem but the demo is nearly impossible to execute properly in 5 days on Kaggle. Nmap and Metasploit are likely ToS violations. 'Autonomous remediation' in a real network context is a liability. The demo will be logs + LLM analysis, which is underwhelming. The architecture lacks the course-specific stack (ADK 2.0, A2A) that judges are looking for. Cyber is also a saturated domain in competition submissions.
+            </div>
+            <div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Innovation</span><span style="font-weight:700;color:#f59e0b">6/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:60.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Feasibility (5d)</span><span style="font-weight:700;color:#ef4444">4/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:40.0%;height:100%;background:#ef4444;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Agentic Workflows</span><span style="font-weight:700;color:#f59e0b">7/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:70.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Real-World Impact</span><span style="font-weight:700;color:#10b981">8/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:80.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Wow / Demo Factor</span><span style="font-weight:700;color:#f59e0b">6/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:60.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Google Alignment</span><span style="font-weight:700;color:#f59e0b">6/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:60.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Scalability</span><span style="font-weight:700;color:#f59e0b">7/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:70.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Standout Probability</span><span style="font-weight:700;color:#ef4444">5/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:50.0%;height:100%;background:#ef4444;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:20px;border-left:5px solid #94a3b8;box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <span style="font-size:28px">6️⃣</span>
+                    <div>
+                        <div style="font-size:18px;font-weight:700;color:#1e293b">Idea #2 — EpiGuardian</div>
+                        <div style="font-size:13px;color:#64748b;margin-top:2px">Rank #6 of 6</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <div style="text-align:center">
+                        <div style="font-size:28px;font-weight:800;color:#94a3b8">59</div>
+                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px">/100</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                        <div style="font-size:12px;color:#64748b">Award Potential: <span style="background:#ef4444;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">LOW</span></div>
+                        <div style="font-size:12px;color:#64748b">5-Day Feasibility: <span style="background:#f59e0b;color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700">MEDIUM</span></div>
+                    </div>
+                </div>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:16px;font-size:14px;color:#334155;line-height:1.6">
+                <strong>Verdict:</strong> EpiGuardian has high impact potential but the weakest agentic architecture of all six. The SIR model is textbook Week 1 epidemiology. The surveillance agent doing RAG on WHO data is a single-agent task dressed as five. Most dangerously: pandemic as a topic will trigger 20+ similar submissions from course participants. There's no architectural differentiator. Without the Google Agent Stack (ADK 2.0, A2A, MCP) being central to the design, it falls to last.
+            </div>
+            <div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Innovation</span><span style="font-weight:700;color:#ef4444">5/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:50.0%;height:100%;background:#ef4444;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Feasibility (5d)</span><span style="font-weight:700;color:#ef4444">5/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:50.0%;height:100%;background:#ef4444;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Agentic Workflows</span><span style="font-weight:700;color:#f59e0b">6/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:60.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Real-World Impact</span><span style="font-weight:700;color:#10b981">9/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:90.0%;height:100%;background:#10b981;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Wow / Demo Factor</span><span style="font-weight:700;color:#f59e0b">6/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:60.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Google Alignment</span><span style="font-weight:700;color:#ef4444">5/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:50.0%;height:100%;background:#ef4444;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Scalability</span><span style="font-weight:700;color:#f59e0b">7/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:70.0%;height:100%;background:#f59e0b;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div><div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:3px">
+            <span>Standout Probability</span><span style="font-weight:700;color:#ef4444">4/10</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+            <div style="width:40.0%;height:100%;background:#ef4444;border-radius:4px;transition:width 0.3s"></div>
+        </div>
+    </div></div>
+        </div>
+  </div>
+
+  <!-- ENHANCEMENT RECOMMENDATIONS -->
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:22px;margin-bottom:28px">
+    <h3 style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:16px">🔧 Key Enhancements to Maximize Award Potential</h3>
+    <div style="display:grid;gap:12px">
+      <div style="background:#f0fdf4;border-radius:10px;padding:16px;border-left:4px solid #10b981">
+        <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:8px">EcoFlow — Must-Have Features</div>
+        <ul style="font-size:13px;color:#15803d;line-height:1.8;padding-left:18px">
+          <li>Implement a real A2A protocol handshake between at least 2 local supplier agents — this is the visual proof of the architecture</li>
+          <li>Generate a real carbon audit PDF output with Scope 3 calculations using EPA emission factors (public data)</li>
+          <li>Deploy to Cloud Run and include the live URL in the Kaggle writeup — judges notice deployed projects</li>
+          <li>Visualize the supplier A2A communication as a real-time message trace in the notebook</li>
+        </ul>
+      </div>
+      <div style="background:#eef2ff;border-radius:10px;padding:16px;border-left:4px solid #6366f1">
+        <div style="font-size:13px;font-weight:700;color:#4338ca;margin-bottom:8px">CogniTrial — Must-Have Features</div>
+        <ul style="font-size:13px;color:#3730a3;line-height:1.8;padding-left:18px">
+          <li>Use a real protocol from ClinicalTrials.gov — do not use synthetic data; judges will check</li>
+          <li>Show the compliance score improving in a graph: 62% → 89% → 94% after correction loops</li>
+          <li>The adversarial simulator must generate at least 10 edge-case patient profiles — show concrete failures it found</li>
+          <li>Include an architecture diagram showing the ADK 2.0 Workflow DAG with rollback arrows</li>
+        </ul>
+      </div>
+      <div style="background:#fffbeb;border-radius:10px;padding:16px;border-left:4px solid #f59e0b">
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:8px">SentinelNet — Must-Have Features</div>
+        <ul style="font-size:13px;color:#78350f;line-height:1.8;padding-left:18px">
+          <li>The demo MUST show a before/after: a specific attack succeeds, the interceptor flags it, the patch is applied, the attack now fails</li>
+          <li>Use real prompt injection payloads from OWASP's Agentic AI Top 10 — cite them in your writeup</li>
+          <li>Show the ADK 2.0 before_agent/after_event interceptor hooks in your code — this is the technical differentiator</li>
+          <li>Deploy a 'vulnerable target agent' as a separate Cloud Run service for the demo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADVISOR RESPONSES -->
+  <div style="margin-bottom:28px">
+    <h2 style="font-size:18px;font-weight:800;color:#1e293b;margin-bottom:16px">💬 Individual Advisor Responses</h2>
+    
+        <details style="margin-bottom:14px">
+            <summary style="cursor:pointer;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:10px">
+                <span style="width:28px;height:28px;border-radius:50%;background:#ef4444;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px">⚔</span>
+                <span>The Contrarian</span>
+                <span style="margin-left:auto;font-size:12px;color:#94a3b8">click to expand</span>
+            </summary>
+            <div style="padding:18px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;font-size:14px;color:#334155;line-height:1.7">
+                <p>Every one of these ideas has a version of the same fatal flaw: they're solving prestigious-sounding problems with architectures that will collapse under 5-day time pressure.</p><p>PyroShield (Idea 1) sounds incredible on paper. In practice: Google Earth Engine requires OAuth and quota approval. Real satellite imagery datasets need preprocessing pipelines that alone take 2 days. You'll end up with mocked sensor data calling a Gemini prompt and calling it 'wildfire detection.' Judges see through mock data immediately. Score: Innovation 7, Feasibility 3, Agentic Workflows 8, Impact 9, Wow Factor 8, Google Alignment 7, Scalability 8, Standout Prob 5. Rank: 4.</p><p>EpiGuardian (Idea 2) is PyroShield in a lab coat. The SIR model is textbook Week 1 epidemiology — not impressive. WHO/CDC data is notoriously siloed and requires institutional access. 'Multilingual alert drafting' is just a Gemini prompt with a language parameter. This is five agents doing what one good RAG pipeline could do. Rank: 6.</p><p>CyberSentinel (Idea 3): Running Nmap/Metasploit on Kaggle notebooks? Almost certainly banned by terms of service. 'Autonomous remediation' on a real network is a liability nightmare. You'll simulate everything and it'll look like a chatbot with extra steps. Rank: 5.</p><p>CogniTrial (Idea 4): This is the sleeper dark horse. Clinical trial protocol auditing has a real, verifiable output. You can actually demo it: put in a draft protocol, watch the regulatory auditor flag violations, see the recalibration loop fix them. FDA/EMA guidelines are publicly available text — perfect for RAG. The adversarial simulator stress-testing your own protocol is genuinely novel. Feasibility is high if you use real public trial data (ClinicalTrials.gov). Rank: 1.</p><p>EcoFlow (Idea 5): The A2A protocol is the real differentiator here. Simulating a federated supplier network via A2A agents is architecturally sophisticated and judges will notice it. CBAM compliance is topical. The problem: you need to fake all supplier agents yourself, so the 'federation' is a simulation. But it's a sophisticated simulation. Rank: 2.</p><p>SentinelNet (Idea 6): This is the most technically impressive on paper and the hardest to demo convincingly. 'Prompt injection attacks' in a sandboxed environment is real research territory. But showing that your patching agent actually fixed vulnerabilities in a 5-minute demo is nearly impossible without a contrived setup. Risk: it looks like a hack-the-flag CTF that judges can't verify. Rank: 3.</p>
+            </div>
+        </details>
+        <details style="margin-bottom:14px">
+            <summary style="cursor:pointer;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:10px">
+                <span style="width:28px;height:28px;border-radius:50%;background:#6366f1;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px">🔬</span>
+                <span>The First Principles Thinker</span>
+                <span style="margin-left:auto;font-size:12px;color:#94a3b8">click to expand</span>
+            </summary>
+            <div style="padding:18px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;font-size:14px;color:#334155;line-height:1.7">
+                <p>What are judges in a 5-day AI agent competition actually optimizing for? Strip away the domain glamour.</p><p>They want to see: (1) Real agentic behavior — agents that plan, use tools, self-correct, and hand off tasks — NOT just chained LLM calls. (2) Technical depth that's visible in the demo — they can see the architecture working. (3) Google ecosystem fluency — ADK 2.0, MCP, A2A usage signals you learned the actual course material. (4) A problem that's real but scoped — not 'cure cancer' and not 'summarize PDFs.'</p><p>With that lens:</p><p>Ideas 1-3 (PyroShield, EpiGuardian, CyberSentinel) share a structural problem: they're solving massive real-world problems (wildfires, pandemics, cyberattacks) with data pipelines that don't exist in Kaggle environments. The 'wow' comes from the problem domain, not from the agents themselves. A judge who strips away the domain framing sees: weather API call → Gemini prompt → alert email. That's not multi-agent. That's a chain.</p><p>Ideas 4-6 (CogniTrial, EcoFlow, SentinelNet) are operating in a different category. They're using ADK 2.0 explicitly, deploying on Cloud Run, using SPIFFE identities, implementing A2A. These aren't just using AI — they're demonstrating mastery of the specific Google Agent Stack introduced in this course.</p><p>From first principles, the correct ranking: EcoFlow (5) &gt; CogniTrial (4) &gt; SentinelNet (6) &gt; PyroShield (1) &gt; CyberSentinel (3) &gt; EpiGuardian (2).</p><p>EcoFlow wins the first-principles argument because it uniquely implements A2A between real federated agents — which is the hardest and newest capability in the stack. CogniTrial wins on verifiability: clinical protocol compliance has ground truth you can show. SentinelNet wins on meta-interest (security of agents is the hot topic in 2026). The first three ideas are solving big problems with small tools and hoping judges won't notice.</p>
+            </div>
+        </details>
+        <details style="margin-bottom:14px">
+            <summary style="cursor:pointer;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:10px">
+                <span style="width:28px;height:28px;border-radius:50%;background:#10b981;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px">🚀</span>
+                <span>The Expansionist</span>
+                <span style="margin-left:auto;font-size:12px;color:#94a3b8">click to expand</span>
+            </summary>
+            <div style="padding:18px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;font-size:14px;color:#334155;line-height:1.7">
+                <p>Everyone on this council will point out risks. I'm here to point out what gets UNDERSOLD.</p><p>SentinelNet (Idea 6) is being undervalued. Think about what it actually is: a system where AI agents autonomously discover and patch vulnerabilities in other AI agents. This is not a capstone project — this is a research paper. In 2026, AI agent security is THE hot topic. OWASP released its Top 10 for Agentic AI. Google's Agent Runtime has security primitives specifically because of this threat. A working demo of SentinelNet where you inject a prompt injection attack and watch the Interceptor Guard catch it and the Patching Agent fix the system prompt — that's a conference talk, not a competition entry. Score: Innovation 10, Standout Prob 9.</p><p>EcoFlow (Idea 5) is also being underestimated on the business angle. CBAM (Carbon Border Adjustment Mechanism) came into force in EU in 2026. Companies are LEGALLY REQUIRED to report Scope 3 emissions. This isn't 'nice to have' — this is a regulatory compliance obligation. A working demo here could be pitched to a real client the next day. Startup founders on the judging panel will light up.</p><p>CogniTrial (Idea 4) has the most undervalued ceiling. Clinical trial protocols are a $50M problem per company. The adversarial simulation angle — the system attacking its own output — is publishable. If this demo shows a real protocol (from ClinicalTrials.gov), flagging real regulatory issues, it's not a capstone. It's a company.</p><p>The sleeper: EcoFlow with a real A2A supplier demo. Most submissions will have ONE agent. EcoFlow has agents talking to other agents across a network. That's the future of enterprise AI. Judges who understand where the field is going will recognize it immediately.</p>
+            </div>
+        </details>
+        <details style="margin-bottom:14px">
+            <summary style="cursor:pointer;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:10px">
+                <span style="width:28px;height:28px;border-radius:50%;background:#f59e0b;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px">👁</span>
+                <span>The Outsider</span>
+                <span style="margin-left:auto;font-size:12px;color:#94a3b8">click to expand</span>
+            </summary>
+            <div style="padding:18px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;font-size:14px;color:#334155;line-height:1.7">
+                <p>I'm going to tell you what a smart, curious judge who doesn't follow AI Twitter would actually think watching these demos.</p><p>PyroShield: Wildfire maps with AI overlays. The concept is immediately understandable and scary. Everyone has seen wildfire news. When you show a map with a spreading fire and an AI dispatching drones — that lands emotionally. Even if it's mocked data, the scenario is vivid. This has the highest 'grandma could understand it' score.</p><p>EpiGuardian: COVID trauma is real. 'AI that could have caught COVID-19 earlier' is a powerful sentence. But the demo will probably show charts and text. Health data is abstract. Hard to make visceral.</p><p>CyberSentinel: Cybersecurity is relatable (everyone's heard of ransomware) but the demo will be logs and terminal output. Boring visually unless you really design the UI.</p><p>CogniTrial: Clinical trials? Most judges will need it explained. The regulatory compliance angle is opaque to outsiders. But here's the thing — once explained, it's impressive. The 'AI that stress-tests its own work' narrative is compelling.</p><p>EcoFlow: Carbon footprint is relatable. Everyone knows about climate change. 'AI tracking your supply chain's carbon' is immediately grasped. The A2A supplier negotiation is novel but hard to visualize without good UI. Score: Demo clarity 7.</p><p>SentinelNet: 'AI that hacks AI' is genuinely cool framing. This could be the best elevator pitch of all six. Show an attack in red and a patch in green — even non-technical judges get it. But the demo requires good visualization or it looks like logs.</p><p>My ranking based purely on 'would I be impressed watching the demo': PyroShield (1) &gt; SentinelNet (2) &gt; EcoFlow (3) &gt; EpiGuardian (4) &gt; CogniTrial (5) &gt; CyberSentinel (6). The emotional resonance of wildfires and 'AI vs AI security' wins with outside judges.</p>
+            </div>
+        </details>
+        <details style="margin-bottom:14px">
+            <summary style="cursor:pointer;padding:14px 18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:10px">
+                <span style="width:28px;height:28px;border-radius:50%;background:#3b82f6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px">⚙</span>
+                <span>The Executor</span>
+                <span style="margin-left:auto;font-size:12px;color:#94a3b8">click to expand</span>
+            </summary>
+            <div style="padding:18px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;font-size:14px;color:#334155;line-height:1.7">
+                <p>I'm going to be the only person who asks: what does Day 1 Monday morning actually look like for each of these?</p><p>PyroShield: Day 1 you hit a wall. Google Earth Engine requires OAuth setup and API approval that takes days. NOAA APIs require registration. Real satellite imagery needs preprocessing you haven't planned for. You spend 2 days on data plumbing and end up with a synthetic fire simulation anyway. The architecture is real but the data is fake — and a Kaggle judge will see through that. Feasibility: 4/10.</p><p>EpiGuardian: WHO data is downloadable CSV files. That's actually fine. SIR model is 20 lines of Python. But the 'surveillance agent' scraping social signals hits rate limits and terms-of-service walls fast. You'll end up with static dataset + LLM prompts. Feasibility: 5/10.</p><p>CyberSentinel: Nmap in Kaggle notebooks — almost certainly violates ToS. You'll simulate everything. The core demo will be: here's a log file, the agent flagged it, here's the remediation plan. Underwhelming. Feasibility: 4/10.</p><p>CogniTrial: Day 1 — download 5 clinical trial protocols from ClinicalTrials.gov (public domain). FDA guidelines are public text. Set up an ADK 2.0 Workflow with Pydantic schemas. This is DOABLE. The adversarial simulator is the hardest part but you can scope it to 'generate edge-case patient profiles.' Clear path to a working demo. Feasibility: 8/10.</p><p>EcoFlow: Day 1 — set up two local FastMCP servers simulating suppliers. A2A protocol implementation is well-documented in ADK 2.0 examples. Carbon emission factors are public data (EPA emission factors DB). The pipeline is clear. Cloud Run deployment in 4 hours on Day 5. Feasibility: 7/10.</p><p>SentinelNet: Day 1 — build a deliberately vulnerable agent. Day 2 — build the attack agent (prompt injection library exists). This is the most 'meta' and actually has the clearest MVP path because you control both sides. ADK 2.0 interceptors are documented. Feasibility: 7/10.</p><p>Executor ranking: CogniTrial (1) &gt; EcoFlow (2) &gt; SentinelNet (3) &gt; EpiGuardian (4) &gt; PyroShield (5) &gt; CyberSentinel (6).</p>
+            </div>
+        </details>
+  </div>
+
+  <!-- PEER REVIEWS -->
+  <div style="margin-bottom:28px">
+    <h2 style="font-size:18px;font-weight:800;color:#1e293b;margin-bottom:16px">🔄 Peer Review Highlights</h2>
+    
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:18px;margin-bottom:14px;border-left:4px solid #ef4444">
+            <div style="font-size:13px;font-weight:700;color:#ef4444;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">The Contrarian Reviews</div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#10b981;background:#f0fdf4;padding:2px 8px;border-radius:4px">STRONGEST RESPONSE</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response D (The Outsider) — because it correctly identifies that emotional resonance and demo clarity are what swing judges who don't have technical depth. Most submissions fail at the demo layer, not the technical layer. This insight is frequently missed by engineers.</p>
+            </div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#ef4444;background:#fef2f2;padding:2px 8px;border-radius:4px">BIGGEST BLIND SPOT</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response C (The Expansionist) has the biggest blind spot: it correctly identifies upside but completely ignores that 'this could be a company' and 'this could win a 5-day competition' are completely different things. A company-worthy idea needs 6 months, not 5 days. The Expansionist is solving a different problem.</p>
+            </div>
+            <div>
+                <span style="font-size:12px;font-weight:700;color:#6366f1;background:#eef2ff;padding:2px 8px;border-radius:4px">WHAT ALL MISSED</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Nobody mentioned that EcoFlow's A2A supplier simulation is actually easy to fake convincingly — because you control BOTH sides of the network. That makes it the most deceptive-in-a-good-way project: it looks architecturally sophisticated but the supplier agents are just your own local FastMCP servers. This is the key insight that changes the feasibility calculation for EcoFlow significantly upward.</p>
+            </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:18px;margin-bottom:14px;border-left:4px solid #6366f1">
+            <div style="font-size:13px;font-weight:700;color:#6366f1;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">The First Principles Thinker Reviews</div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#10b981;background:#f0fdf4;padding:2px 8px;border-radius:4px">STRONGEST RESPONSE</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response E (The Executor) is the strongest because it's the only one asking the right question: what blocks Day 1? Technical feasibility IS the constraint in a 5-day competition. All the domain prestige in the world means nothing if you can't get the data pipeline working. The Executor's ranking is the most grounded.</p>
+            </div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#ef4444;background:#fef2f2;padding:2px 8px;border-radius:4px">BIGGEST BLIND SPOT</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response D (The Outsider) has the biggest blind spot: it ranks PyroShield first because it's emotionally resonant, but judges in THIS competition are specifically technical. The judging criteria include 'effective use of agentic workflows' and 'technical depth.' A wildfire map that impresses your grandmother will not impress an AI researcher who sees the plumbing.</p>
+            </div>
+            <div>
+                <span style="font-size:12px;font-weight:700;color:#6366f1;background:#eef2ff;padding:2px 8px;border-radius:4px">WHAT ALL MISSED</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Everyone missed the meta-point about competition saturation. In a 5-day course with hundreds of participants, the most likely topics to be OVERDONE are the obvious high-impact domains: pandemics, wildfires, cybersecurity. These are the first ideas people generate. Niche, novel applications that aren't the first thing you'd think of — like CogniTrial's clinical trial auditing — are more likely to stand out simply by being less crowded.</p>
+            </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:18px;margin-bottom:14px;border-left:4px solid #10b981">
+            <div style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">The Expansionist Reviews</div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#10b981;background:#f0fdf4;padding:2px 8px;border-radius:4px">STRONGEST RESPONSE</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response B (The First Principles Thinker) is strongest because it correctly identifies the structural gap between Ideas 1-3 and Ideas 4-6. Ideas 1-3 use AI to solve big problems. Ideas 4-6 use the SPECIFIC Google Agent Stack to demonstrate mastery of course material. That alignment distinction is the single most important factor in winning a course-specific competition.</p>
+            </div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#ef4444;background:#fef2f2;padding:2px 8px;border-radius:4px">BIGGEST BLIND SPOT</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response A (The Contrarian) has the biggest blind spot: it dismisses EpiGuardian too quickly without noting that pandemic surveillance with a working RAG pipeline over real CDC data could actually be more impressive than wildfire simulations. The domain is topical in 2026. The Contrarian's cynicism about 'five agents doing what one RAG does' ignores that judges reward architectural ambition even when simpler solutions exist.</p>
+            </div>
+            <div>
+                <span style="font-size:12px;font-weight:700;color:#6366f1;background:#eef2ff;padding:2px 8px;border-radius:4px">WHAT ALL MISSED</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Nobody mentioned the portfolio effect. SentinelNet, if executed well, positions the creator as an 'AI security researcher' — a rare and valuable identity. The second-order value of winning with SentinelNet is dramatically higher than winning with PyroShield. Kaggle winners get career opportunities. A SentinelNet win says 'I build AI security systems.' A PyroShield win says 'I build interesting prototypes.'</p>
+            </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:18px;margin-bottom:14px;border-left:4px solid #f59e0b">
+            <div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">The Outsider Reviews</div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#10b981;background:#f0fdf4;padding:2px 8px;border-radius:4px">STRONGEST RESPONSE</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response E (The Executor) is strongest. I initially disagreed because I thought emotional resonance mattered most, but on reflection: judges see 50-100 submissions. They're not watching full demos. They're reading the writeup first. A writeup that says 'I implemented ADK 2.0 dynamic workflows with A2A protocol and Cloud Run deployment' will get more reads than 'I built a wildfire AI.' The Executor understands that the winner is whichever project gets a judge excited enough to actually run the notebook.</p>
+            </div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#ef4444;background:#fef2f2;padding:2px 8px;border-radius:4px">BIGGEST BLIND SPOT</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response C (The Expansionist) — the 'this could be a company' framing is a blind spot. Judges aren't investors. They're evaluating against competition criteria, not market viability. A project that 'solves a $50M problem' but has a confusing demo doesn't win.</p>
+            </div>
+            <div>
+                <span style="font-size:12px;font-weight:700;color:#6366f1;background:#eef2ff;padding:2px 8px;border-radius:4px">WHAT ALL MISSED</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Everyone missed that CogniTrial has a built-in evaluation metric. You can run the clinical protocol through actual FDA guidelines and show a compliance score going from 62% to 94% after the correction loop. That's a NUMBER. Numbers in demos are persuasive. Most of these other projects have outputs that are hard to objectively evaluate — which means judges have to guess if they worked.</p>
+            </div>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:18px;margin-bottom:14px;border-left:4px solid #3b82f6">
+            <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">The Executor Reviews</div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#10b981;background:#f0fdf4;padding:2px 8px;border-radius:4px">STRONGEST RESPONSE</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response B (The First Principles Thinker) is strongest for one reason: it correctly identifies that Ideas 4-6 use the actual course stack (ADK 2.0, A2A, MCP). Course competitions reward alignment with course content. This is obvious in hindsight but Response B is the only one who makes it the central argument.</p>
+            </div>
+            <div style="margin-bottom:10px">
+                <span style="font-size:12px;font-weight:700;color:#ef4444;background:#fef2f2;padding:2px 8px;border-radius:4px">BIGGEST BLIND SPOT</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Response A (The Contrarian) has a blind spot about PyroShield's data problem — but then RANKS CogniTrial #1 without fully addressing that ClinicalTrials.gov data still requires significant domain preprocessing. Both have data pipeline risks. The Contrarian is selectively critical.</p>
+            </div>
+            <div>
+                <span style="font-size:12px;font-weight:700;color:#6366f1;background:#eef2ff;padding:2px 8px;border-radius:4px">WHAT ALL MISSED</span>
+                <p style="font-size:14px;color:#334155;margin-top:6px;line-height:1.6">Nobody mentioned time allocation for the WRITEUP. Kaggle competitions require a polished notebook with explanation, architecture diagrams, and results. Projects with simpler, cleaner architectures (4 agents vs 5+) leave more time for documentation quality — which is what judges actually read. EcoFlow's 4-agent design might have an advantage over PyroShield's 5-agent design purely because the writeup will be cleaner.</p>
+            </div>
+        </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;border-top:1px solid #e2e8f0">
+    <p>LLM Council · Generated June 18, 2026 at 18:03 · 5 advisors · 5 peer reviews · 1 chairman synthesis</p>
+    <p style="margin-top:4px">Kaggle × Google 5-Day Gen AI Agent Course — Capstone Project Evaluation</p>
+  </div>
+
+</div>
+</body>
+</html>
