@@ -130,3 +130,88 @@ def test_carbon_agent_run_cycle(db_session):
     db_session.delete(product)
     db_session.delete(supplier)
     db_session.commit()
+
+def test_cbam_agent_audit_cycle(db_session):
+    from agents.cbam_agent import CBAMAuditAgent
+    from api.models import CBAMAudit
+
+    # 1. Setup a test supplier, product, shipment, emission
+    supplier = Supplier(name="Test CBAM Supplier", country="CN", industry="Testing")
+    db_session.add(supplier)
+    db_session.commit()
+
+    product = Product(hs_code="888888", description="Test CBAM Product")
+    db_session.add(product)
+    db_session.commit()
+
+    shipment = Shipment(
+        supplier_id=supplier.supplier_id,
+        product_id=product.product_id,
+        date=pd.Timestamp.now().date(),
+        quantity=100.0,
+        unit="tonnes",
+        origin_country="CN",
+        dest_country="DE",
+        is_processed=True
+    )
+    db_session.add(shipment)
+    db_session.commit()
+
+    emission = Emission(
+        shipment_id=shipment.shipment_id,
+        emission_tCO2=200.0,
+        method="DIRECT_FACTOR"
+    )
+    db_session.add(emission)
+    db_session.commit()
+
+    # 2. Run CBAM agent audit cycle
+    agent = CBAMAuditAgent()
+    result = agent.run_audit_cycle(carbon_price=80.0)
+
+    assert result["status"] == "success"
+    assert result["audits_created"] == 1
+
+    # 3. Assert DB record exists and tariff is correct (200.0 tCO2 * 80.0 EUR = 16000.0 EUR)
+    audit = db_session.query(CBAMAudit).filter_by(emission_id=emission.emission_id).first()
+    assert audit is not None
+    assert audit.tariff_due_eur == 16000.0
+    assert "SUBJECT TO TARIFF" in audit.compliance_status
+
+    # Cleanup
+    db_session.delete(audit)
+    db_session.delete(emission)
+    db_session.delete(shipment)
+    db_session.delete(product)
+    db_session.delete(supplier)
+    db_session.commit()
+
+def test_api_endpoints():
+    from fastapi.testclient import TestClient
+    from api.app import app
+
+    client = TestClient(app)
+
+    # Test GET /
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "EcoFlow API is running" in response.json()["message"]
+
+    # Test GET /api/dashboard/summary
+    response = client.get("/api/dashboard/summary")
+    assert response.status_code == 200
+    data = response.json()
+    assert "total_emissions_tCO2" in data
+    assert "cbam_liabilities_eur" in data
+    assert "top_emitting_supplier" in data
+
+    # Test POST /api/query
+    response = client.post("/api/query", json={
+        "user_id": 1,
+        "question": "Show top emitting supplier",
+        "context": {}
+    })
+    assert response.status_code == 200
+    assert "answer" in response.json()
+    assert response.json()["status"] == "success"
+
