@@ -1,0 +1,51 @@
+shipment_date,supplier_name,hs_code,quantity,unit,origin_country,dest_country
+2025-01-11,Euro Metalworks,760110,39.16,tonnes,DE,DE
+2025-01-15,US Alloys Corp,760410,59.5,tonnes,US,DE
+2025-01-19,US Alloys Corp,760110,46.47,tonnes,US,DE
+2025-01-22,Euro Metalworks,730630,59.4,tonnes,DE,DE
+2025-01-31,Acme Steel Co.,760110,16.99,tonnes,CN,DE
+2025-01-31,Bengal Aluminum Ltd.,720810,82.75,tonnes,IN,DE
+2025-02-04,Euro Metalworks,760410,46.45,tonnes,DE,DE
+2025-02-06,US Alloys Corp,760110,54.39,tonnes,US,DE
+2025-02-09,Acme Steel Co.,730630,118.3,tonnes,CN,DE
+2025-02-18,US Alloys Corp,760110,14.97,tonnes,US,DE
+2025-02-24,US Alloys Corp,760110,41.82,tonnes,US,DE
+2025-03-01,US Alloys Corp,720810,206.94,tonnes,US,DE
+2025-03-02,US Alloys Corp,730630,126.26,tonnes,US,DE
+2025-03-03,Acme Steel Co.,730630,170.8,tonnes,CN,DE
+2025-03-06,US Alloys Corp,760410,13.58,tonnes,US,DE
+2025-03-07,Bengal Aluminum Ltd.,730630,133.13,tonnes,IN,DE
+2025-03-10,US Alloys Corp,760110,13.64,tonnes,US,DE
+2025-03-12,Euro Metalworks,730630,69.05,tonnes,DE,DE
+2025-03-13,US Alloys Corp,730630,141.34,tonnes,US,DE
+2025-03-13,Euro Metalworks,760410,49.49,tonnes,DE,DE
+2025-03-15,Acme Steel Co.,760410,25.93,tonnes,CN,DE
+2025-03-18,US Alloys Corp,760410,67.36,tonnes,US,DE
+2025-03-26,US Alloys Corp,730630,183.14,tonnes,US,DE
+2025-03-27,Euro Metalworks,760110,58.72,tonnes,DE,DE
+2025-03-28,Euro Metalworks,760410,76.35,tonnes,DE,DE
+2025-03-31,Acme Steel Co.,730630,90.07,tonnes,CN,DE
+2025-04-02,US Alloys Corp,720810,151.54,tonnes,US,DE
+2025-04-06,US Alloys Corp,760110,14.28,tonnes,US,DE
+2025-04-07,US Alloys Corp,760110,75.93,tonnes,US,DE
+2025-04-09,Euro Metalworks,760110,53.7,tonnes,DE,DE
+2025-04-21,US Alloys Corp,760110,19.08,tonnes,US,DE
+2025-04-21,US Alloys Corp,730630,72.66,tonnes,US,DE
+2025-04-24,US Alloys Corp,760410,67.01,tonnes,US,DE
+2025-04-25,US Alloys Corp,720810,101.07,tonnes,US,DE
+2025-04-26,US Alloys Corp,760110,47.96,tonnes,US,DE
+2025-05-07,Bengal Aluminum Ltd.,730630,200.93,tonnes,IN,DE
+2025-05-10,Euro Metalworks,720810,209.4,tonnes,DE,DE
+2025-05-13,Bengal Aluminum Ltd.,730630,93.63,tonnes,IN,DE
+2025-05-20,US Alloys Corp,720810,206.74,tonnes,US,DE
+2025-05-23,Bengal Aluminum Ltd.,720810,109.03,tonnes,IN,DE
+2025-05-23,Acme Steel Co.,720810,238.88,tonnes,CN,DE
+2025-05-26,Bengal Aluminum Ltd.,760110,54.3,tonnes,IN,DE
+2025-05-29,Bengal Aluminum Ltd.,730630,131.15,tonnes,IN,DE
+2025-06-02,Euro Metalworks,720810,220.35,tonnes,DE,DE
+2025-06-10,Euro Metalworks,760410,43.57,tonnes,DE,DE
+2025-06-14,Euro Metalworks,760410,23.91,tonnes,DE,DE
+2025-06-19,US Alloys Corp,760410,65.54,tonnes,US,DE
+2025-06-22,Acme Steel Co.,760410,61.43,tonnes,CN,DE
+2025-06-28,US Alloys Corp,730630,97.14,tonnes,US,DE
+2025-06-30,Bengal Aluminum Ltd.,720810,91.54,tonnes,IN,DE
