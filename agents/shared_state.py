@@ -156,6 +156,11 @@ class ExecutionState(BaseModel):
     mcp_validation_events: List[Any] = Field(default_factory=list)
     mcp_performance_metrics: Dict[str, Any] = Field(default_factory=dict)
 
+    # A2A Session and Tracing
+    a2a_sessions: Dict[str, Any] = Field(default_factory=dict)
+    a2a_audit_trail: List[Any] = Field(default_factory=list)
+    a2a_trust_scores: Dict[str, float] = Field(default_factory=dict)
+
     user_goal: str
     uploaded_documents: List[str] = []
     current_tasks: List[Task] = []

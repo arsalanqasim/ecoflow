@@ -73,8 +73,18 @@ class ConversationAgent(BaseAgent):
             cbam_task = history.get("get_cbam_liabilities")
             total_emissions_task = history.get("get_total_emissions")
             
+            # A2A Goal Response
+            if "a2a" in state.user_goal.lower() or "federat" in state.user_goal.lower():
+                calc_task = history.get("run_calc")
+                processed_count = calc_task.output_data.get("processed_count", 0) if calc_task else 0
+                answer = (
+                    f"A2A Federated supplier carbon audit cycle completed successfully. "
+                    f"Processed **{processed_count}** shipments across the independent supplier network. "
+                    f"Handshakes established and Scope 3 emissions fetched securely over the A2A directory."
+                )
+
             # 1. Top Emitter Response
-            if top_emitter_task and top_emitter_task.execution_status == "COMPLETED" and "top_emitting_supplier" in top_emitter_task.output_data:
+            elif top_emitter_task and top_emitter_task.execution_status == "COMPLETED" and "top_emitting_supplier" in top_emitter_task.output_data:
                 data = top_emitter_task.output_data
                 supplier_name = data.get("supplier_name", "Unknown")
                 total_emissions = data.get("total_emissions", 0.0)
@@ -158,6 +168,30 @@ class ConversationAgent(BaseAgent):
                     reason = matching_dec["reasoning"] if matching_dec else "Discovered and executed dynamically."
                     answer += f"- **{chain['agent_name']}** executed `{chain['tool_name']}`\n"
                     answer += f"  - *Reasoning:* {reason}\n"
+
+            # Append A2A Federated Audit Trail summary
+            if answer and getattr(state, "a2a_audit_trail", None):
+                answer += f"\n\n**A2A Federated Audit Trail:**\n"
+                
+                # Show remote sessions and their auth/perm states
+                if getattr(state, "a2a_sessions", None):
+                    answer += f"**Active Remote Agent Sessions:**\n"
+                    for org, sess in state.a2a_sessions.items():
+                        answer += f"- **{org}**: Session ID: `{sess.session_id}` | Auth: `{sess.auth_state}` | Permissions: `{', '.join(sess.permission_grants)}` | Negotiation: `{sess.negotiation_state}`\n"
+                
+                # Show dynamic trust scores
+                if getattr(state, "a2a_trust_scores", None):
+                    answer += f"\n**A2A Dynamic Trust Scores:**\n"
+                    for org, score in state.a2a_trust_scores.items():
+                        answer += f"- **{org}**: Trust Rating: `{score:.2f}/1.00`\n"
+                        
+                # Show consensus engine results
+                consensus_report = state.planner_learning.get("consensus_report") if hasattr(state, "planner_learning") and state.planner_learning else None
+                if consensus_report:
+                    answer += f"\n**A2A Remote Consensus Summary:**\n"
+                    answer += f"- *Summary:* {consensus_report['summary']}\n"
+                    answer += f"- *Agreement score:* `{consensus_report['consensus_score']*100:.0f}%`\n"
+                    answer += f"- *Recommendation:* `{consensus_report['final_recommendation']}`\n"
 
             if not answer:
                 answer = "Goal execution completed. Please check task results for details."

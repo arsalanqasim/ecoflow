@@ -57,6 +57,7 @@ class OptimizationAgent(BaseAgent):
             # Discover logistics optimization tool
             opt_tool = self.discover_and_select_tool("optimize_logistics", state)
             
+            contributors = self.memory.get("contributors", [])
             optimization_results = []
             
             if contributors:

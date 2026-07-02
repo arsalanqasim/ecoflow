@@ -29,7 +29,157 @@ class SupplierAgent(BaseAgent):
         try:
             task_type = task.input_data.get("action")
             
-            if task_type == "get_supplier_metrics":
+            if task_type == "discover_cards":
+                from agents.a2a_directory import a2a_directory
+                cards = {k: card.dict() for k, card in a2a_directory.cards.items()}
+                db.close()
+                elapsed = time.time() - start_time
+                return TaskResult(
+                    task_id=task.task_id,
+                    execution_status="COMPLETED",
+                    output_data={"discovered_agent_cards": cards},
+                    execution_time=elapsed,
+                    confidence=1.0
+                )
+                
+            elif task_type == "a2a_supplier_handshakes":
+                from agents.a2a_directory import a2a_directory
+                from agents.shared_state import SupplierResponse as SupplierResponseModel
+                
+                # Query Supplier A
+                res_a = a2a_directory.send_remote_message("Supplier_A", "Carbon Data Request", {"auth_token": "TOK_A"}, state)
+                state.supplier_responses.append(SupplierResponseModel(
+                    supplier_id=res_a["supplier_id"],
+                    supplier_name=res_a["supplier_name"],
+                    emission_data_status=res_a["disclosure_type"],
+                    reported_emissions=res_a["emissions_tCO2"],
+                    verification_source=res_a["verification_source"]
+                ))
+                
+                # Query Supplier B
+                res_b = a2a_directory.send_remote_message("Supplier_B", "Carbon Data Request", {"auth_token": "TOK_B"}, state)
+                state.supplier_responses.append(SupplierResponseModel(
+                    supplier_id=res_b["supplier_id"],
+                    supplier_name=res_b["supplier_name"],
+                    emission_data_status=res_b["disclosure_type"],
+                    reported_emissions=res_b["emissions_tCO2"],
+                    verification_source=res_b["verification_source"]
+                ))
+                
+                # Query Supplier C - this should raise PermissionError
+                task.input_data["remote_org"] = "Supplier_C"
+                try:
+                    res_c = a2a_directory.send_remote_message("Supplier_C", "Carbon Data Request", {"auth_token": "TOK_C_INITIAL"}, state)
+                except PermissionError as pe:
+                    db.close()
+                    elapsed = time.time() - start_time
+                    return TaskResult(
+                        task_id=task.task_id,
+                        execution_status="FAILED",
+                        error_message=str(pe),
+                        execution_time=elapsed,
+                        confidence=0.0
+                    )
+                    
+                db.close()
+                elapsed = time.time() - start_time
+                return TaskResult(
+                    task_id=task.task_id,
+                    execution_status="COMPLETED",
+                    output_data={"supplier_responses": [r.dict() for r in state.supplier_responses]},
+                    execution_time=elapsed,
+                    confidence=1.0
+                )
+                
+            elif task_type == "negotiate_access":
+                from agents.a2a_directory import a2a_directory
+                remote_org = task.input_data.get("remote_org", "Supplier_C")
+                
+                res = a2a_directory.send_remote_message(remote_org, "Negotiate", {}, state)
+                
+                db.close()
+                elapsed = time.time() - start_time
+                return TaskResult(
+                    task_id=task.task_id,
+                    execution_status="COMPLETED",
+                    output_data={"negotiation_result": res},
+                    execution_time=elapsed,
+                    confidence=1.0
+                )
+                
+            elif task_type == "query_supplier":
+                from agents.a2a_directory import a2a_directory
+                from agents.shared_state import SupplierResponse as SupplierResponseModel
+                remote_org = task.input_data.get("remote_org", "Supplier_C")
+                
+                res_c = a2a_directory.send_remote_message(remote_org, "Carbon Data Request", {"auth_token": "TOK_C_PRIVILEGED"}, state)
+                
+                # Add or update SupplierResponse
+                supplier_res = SupplierResponseModel(
+                    supplier_id=res_c["supplier_id"],
+                    supplier_name=res_c["supplier_name"],
+                    emission_data_status=res_c["disclosure_type"],
+                    reported_emissions=res_c["emissions_tCO2"],
+                    verification_source=res_c["verification_source"]
+                )
+                state.supplier_responses.append(supplier_res)
+                
+                db.close()
+                elapsed = time.time() - start_time
+                return TaskResult(
+                    task_id=task.task_id,
+                    execution_status="COMPLETED",
+                    output_data={"supplier_responses": [supplier_res.dict()]},
+                    execution_time=elapsed,
+                    confidence=1.0
+                )
+                
+            elif task_type == "run_consensus":
+                from agents.certification_agent import CertificationAgent
+                from agents.transport_agent import TransportAgent
+                from agents.consensus_engine import RemoteConsensusEngine
+                from agents.collaboration import AgentConsensus
+                
+                # Query Certification Agent
+                ca_agent = CertificationAgent()
+                ca_task = Task(task_id="ca_verification", assigned_agent="CertificationAgent", input_data={"supplier_name": "Supplier A Corp"})
+                ca_res = ca_agent.execute(state, ca_task)
+                state.task_history["ca_verification"] = ca_res
+                
+                # Query Transport Agent
+                transport_agent = TransportAgent()
+                transport_task = Task(task_id="transport_verification", assigned_agent="TransportAgent", input_data={"shipment_id": 1})
+                transport_res = transport_agent.execute(state, transport_task)
+                state.task_history["transport_verification"] = transport_res
+                
+                # Generate Consensus
+                engine = RemoteConsensusEngine(llm_reason_fn=self.llm_reason)
+                consensus_report = engine.generate_consensus(state)
+                
+                consensus_evt = AgentConsensus(
+                    topic="Scope 3 Verification Consensus",
+                    consensus_score=consensus_report["consensus_score"],
+                    final_recommendation=consensus_report["final_recommendation"],
+                    supporting_agents=["SupplierAgent", "CertificationAgent", "TransportAgent"],
+                    disagreeing_agents=[],
+                    evidence_summary=consensus_report["summary"]
+                )
+                state.consensus_events.append(consensus_evt)
+                if not state.planner_learning:
+                    state.planner_learning = {}
+                state.planner_learning["consensus_report"] = consensus_report
+                
+                db.close()
+                elapsed = time.time() - start_time
+                return TaskResult(
+                    task_id=task.task_id,
+                    execution_status="COMPLETED",
+                    output_data={"consensus_report": consensus_report},
+                    execution_time=elapsed,
+                    confidence=consensus_report["consensus_score"]
+                )
+
+            elif task_type == "get_supplier_metrics":
                 suppliers = db.query(Supplier).all()
                 supplier_responses = []
                 

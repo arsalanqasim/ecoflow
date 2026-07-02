@@ -146,6 +146,26 @@ class PlannerAgent(BaseAgent):
         return state
 
     def _update_agent_reputation(self, state: ExecutionState, task: Task, result: TaskResult):
+        # A2A Trust score initialization
+        if not hasattr(state, "a2a_trust_scores") or state.a2a_trust_scores is None:
+            state.a2a_trust_scores = {}
+        if not state.a2a_trust_scores:
+            state.a2a_trust_scores["Supplier_A"] = 0.98
+            state.a2a_trust_scores["Supplier_B"] = 0.85
+            state.a2a_trust_scores["Supplier_C"] = 0.75
+            state.a2a_trust_scores["Certification_Authority"] = 1.0
+            state.a2a_trust_scores["Logistics_Provider"] = 0.95
+
+        # Trust decay and evaluation rules based on execution
+        if task.assigned_agent == "SupplierAgent":
+            remote_org = task.input_data.get("remote_org")
+            if remote_org in state.a2a_trust_scores:
+                current_trust = state.a2a_trust_scores[remote_org]
+                if result.execution_status == "FAILED":
+                    state.a2a_trust_scores[remote_org] = max(0.1, current_trust - 0.15)
+                elif result.confidence < 0.80:
+                    state.a2a_trust_scores[remote_org] = max(0.1, current_trust - 0.05)
+
         if not state.planner_learning:
             state.planner_learning = {}
         if "agent_reputation" not in state.planner_learning:
@@ -259,6 +279,56 @@ class PlannerAgent(BaseAgent):
         next_recommended = None
 
         if result.execution_status == "FAILED":
+            # Check for Access Denied / Permission Denied to trigger replanning/negotiation
+            if "Access Denied" in str(result.error_message) or "Permission" in str(result.error_message):
+                remote_org = task.input_data.get("remote_org")
+                if remote_org == "Supplier_C" and not any(t.task_id == "supplier_c_negotiation" for t in state.current_tasks):
+                    decision_str = "INSERT_TASKS"
+                    next_recommended = "SupplierAgent"
+                    reasoning = "Access Denied by Supplier C. Triggering A2A negotiation to request monthly average fallbacks."
+                    state.inserted_tasks_count += 1
+                    
+                    negotiate_task = Task(
+                        task_id="supplier_c_negotiation",
+                        assigned_agent="SupplierAgent",
+                        dependencies=[task.task_id],
+                        priority=3,
+                        validation_rules=["has negotiation_result"],
+                        expected_outputs=["negotiation_status"],
+                        input_data={"action": "negotiate_access", "remote_org": "Supplier_C"}
+                    )
+                    state.current_tasks.append(negotiate_task)
+                    
+                    retry_task = Task(
+                        task_id="a2a_supplier_c_retry",
+                        assigned_agent="SupplierAgent",
+                        dependencies=["supplier_c_negotiation"],
+                        priority=4,
+                        validation_rules=["has supplier_responses"],
+                        expected_outputs=["supplier_responses"],
+                        input_data={"action": "query_supplier", "remote_org": "Supplier_C"}
+                    )
+                    state.current_tasks.append(retry_task)
+                    
+                    state.execution_graph["nodes"].append("supplier_c_negotiation")
+                    state.execution_graph["nodes"].append("a2a_supplier_c_retry")
+                    state.execution_graph["edges"].append({"from": task.task_id, "to": "supplier_c_negotiation"})
+                    state.execution_graph["edges"].append({"from": "supplier_c_negotiation", "to": "a2a_supplier_c_retry"})
+                    
+                    for t in state.current_tasks:
+                        if t.task_id == "run_consensus":
+                            if "a2a_supplier_handshakes" in t.dependencies:
+                                t.dependencies.remove("a2a_supplier_handshakes")
+                            t.dependencies.append("a2a_supplier_c_retry")
+                            state.execution_graph["edges"].append({"from": "a2a_supplier_c_retry", "to": "run_consensus"})
+                            
+                    result.execution_status = "COMPLETED"
+                    return AgentDecision(
+                        decision=decision_str,
+                        reasoning=reasoning,
+                        next_recommended_agent=next_recommended
+                    )
+
             if task.retry_count < task.retry_limit:
                 decision_str = "RETRY"
                 reasoning = f"Task {task.task_id} failed. Retrying (Attempt {task.retry_count + 1}). Error: {result.error_message}"
@@ -790,8 +860,8 @@ class PlannerAgent(BaseAgent):
                 ]
             }
 
-        # 5. Ingestion / Data Upload Cycle Goal
-        elif "upload" in goal_lower or "process" in goal_lower or "calculate emissions" in goal_lower:
+        # 5. Ingestion / Data Upload Goal (Non-A2A)
+        elif "upload" in goal_lower or "process" in goal_lower or ("calculate emissions" in goal_lower and "a2a" not in goal_lower and "federat" not in goal_lower):
             return {
                 "goal_model": {
                     "goal_id": "goal_upload_cycle",
@@ -867,6 +937,119 @@ class PlannerAgent(BaseAgent):
                     }
                 ],
                 "edges": [
+                    {"from": "run_calc", "to": "run_audit"},
+                    {"from": "run_calc", "to": "run_optimize"},
+                    {"from": "run_audit", "to": "generate_response"},
+                    {"from": "run_optimize", "to": "generate_response"}
+                ]
+            }
+
+        # 5.5. Federated A2A Multi-Agent Collaboration Goal
+        elif "a2a" in goal_lower or "federate" in goal_lower:
+            return {
+                "goal_model": {
+                    "goal_id": "goal_a2a_federation",
+                    "user_intent": "Execute federated supplier carbon audits",
+                    "desired_outcome": "Authenticate with remote suppliers, negotiate access, cross-validate evidence with cert authority and logistics, and perform consensus audits",
+                    "success_criteria": ["All remote supplier sessions executed", "Trust scores applied", "Consensus verified"],
+                    "remaining_unknowns": []
+                },
+                "planning_hypothesis": {
+                    "hypotheses": [
+                        {
+                            "hypothesis_text": "H1: Connect with remote organizations, authenticate, negotiate Supplier C block, cross-validate evidence, and run calculations.",
+                            "assumed_steps": ["discover_cards", "a2a_supplier_handshakes", "run_consensus", "run_calc", "run_audit", "run_optimize", "generate_response"],
+                            "expected_dependencies": {
+                                "a2a_supplier_handshakes": ["discover_cards"],
+                                "run_consensus": ["a2a_supplier_handshakes"],
+                                "run_calc": ["run_consensus"],
+                                "run_audit": ["run_calc"],
+                                "run_optimize": ["run_calc"],
+                                "generate_response": ["run_audit", "run_optimize"]
+                            },
+                            "confidence": 0.98
+                        }
+                    ],
+                    "selected_hypothesis_index": 0,
+                    "discarded_hypotheses": []
+                },
+                "execution_strategy": "A2A Federated Protocol",
+                "tasks": [
+                    {
+                        "task_id": "discover_cards",
+                        "assigned_agent": "SupplierAgent",
+                        "dependencies": [],
+                        "priority": 1,
+                        "validation_rules": [],
+                        "expected_outputs": ["discovered_agent_cards"],
+                        "retry_limit": 3,
+                        "input_data": {"action": "discover_cards"}
+                    },
+                    {
+                        "task_id": "a2a_supplier_handshakes",
+                        "assigned_agent": "SupplierAgent",
+                        "dependencies": ["discover_cards"],
+                        "priority": 2,
+                        "validation_rules": ["has supplier_responses"],
+                        "expected_outputs": ["supplier_responses"],
+                        "retry_limit": 3,
+                        "input_data": {"action": "a2a_supplier_handshakes"}
+                    },
+                    {
+                        "task_id": "run_consensus",
+                        "assigned_agent": "SupplierAgent",
+                        "dependencies": ["a2a_supplier_handshakes"],
+                        "priority": 3,
+                        "validation_rules": ["has consensus_report"],
+                        "expected_outputs": ["consensus_report"],
+                        "retry_limit": 3,
+                        "input_data": {"action": "run_consensus"}
+                    },
+                    {
+                        "task_id": "run_calc",
+                        "assigned_agent": "CarbonCalculationAgent",
+                        "dependencies": ["run_consensus"],
+                        "priority": 4,
+                        "validation_rules": ["has processed_count"],
+                        "expected_outputs": ["processed_count"],
+                        "retry_limit": 3,
+                        "input_data": {"action": "run_calculation_cycle"}
+                    },
+                    {
+                        "task_id": "run_audit",
+                        "assigned_agent": "ComplianceAgent",
+                        "dependencies": ["run_calc"],
+                        "priority": 5,
+                        "validation_rules": ["has audits_created"],
+                        "expected_outputs": ["audits_created"],
+                        "retry_limit": 3,
+                        "input_data": {"action": "run_audit_cycle", "carbon_price": 80.0}
+                    },
+                    {
+                        "task_id": "run_optimize",
+                        "assigned_agent": "OptimizationAgent",
+                        "dependencies": ["run_calc"],
+                        "priority": 5,
+                        "validation_rules": ["has optimization_results"],
+                        "expected_outputs": ["optimization_results"],
+                        "retry_limit": 3,
+                        "input_data": {"action": "optimize_logistics"}
+                    },
+                    {
+                        "task_id": "generate_response",
+                        "assigned_agent": "ConversationAgent",
+                        "dependencies": ["run_audit", "run_optimize"],
+                        "priority": 6,
+                        "validation_rules": ["has answer"],
+                        "expected_outputs": ["answer"],
+                        "retry_limit": 3,
+                        "input_data": {"action": "generate_response"}
+                    }
+                ],
+                "edges": [
+                    {"from": "discover_cards", "to": "a2a_supplier_handshakes"},
+                    {"from": "a2a_supplier_handshakes", "to": "run_consensus"},
+                    {"from": "run_consensus", "to": "run_calc"},
                     {"from": "run_calc", "to": "run_audit"},
                     {"from": "run_calc", "to": "run_optimize"},
                     {"from": "run_audit", "to": "generate_response"},
