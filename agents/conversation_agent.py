@@ -1,7 +1,7 @@
 import os
 import logging
 import time
-from typing import List
+from typing import List, Any
 from agents.base_agent import BaseAgent, AgentMetadata
 from agents.shared_state import ExecutionState, Task, TaskResult
 from google import genai
@@ -40,6 +40,25 @@ class ConversationAgent(BaseAgent):
         logger.info(f"Executing task: {task.task_id} ({task.assigned_agent})")
         
         try:
+            # Broadcast to collect status summaries from other agents
+            if hasattr(state, "bus") and state.bus is not None:
+                from agents.collaboration import AgentRequest, AgentMessageType
+                try:
+                    req = AgentRequest(
+                        sender="ConversationAgent",
+                        recipient="ALL",
+                        message_type=AgentMessageType.VERIFICATION_REQUEST,
+                        content="Submit final status summary of your audited domain tasks."
+                    )
+                    responses = state.bus.send(req)
+                    summaries = []
+                    for r in responses:
+                        if r and hasattr(r, "content") and r.content:
+                            summaries.append(f"{r.sender}: {r.content}")
+                    self.memory["summaries"] = summaries
+                except Exception as e:
+                    logger.warning(f"Failed to broadcast verification request from ConversationAgent: {e}")
+
             # Gather inputs from previous task outputs or shared state
             history = state.task_history
             goal = state.user_goal
@@ -119,6 +138,17 @@ class ConversationAgent(BaseAgent):
                     logger.warning(f"Gemini API returned error in ConversationAgent: {api_err}. Using fallback.")
                 except Exception as e:
                     logger.warning(f"Failed to call Gemini API in ConversationAgent: {e}. Using fallback.")
+ 
+            # Append collaborative consensus if present
+            if answer and getattr(state, "consensus_events", None):
+                consensus = state.consensus_events[-1]
+                answer += f"\n\n**Collaborative Consensus Details:**\n"
+                answer += f"- **Topic:** {consensus.topic}\n"
+                answer += f"- **Consensus Score:** {consensus.consensus_score * 100:.0f}%\n"
+                answer += f"- **Recommendation:** {consensus.final_recommendation}\n"
+                answer += f"- **Supporting Agents:** {', '.join(consensus.supporting_agents)}"
+                if consensus.disagreeing_agents:
+                    answer += f"\n- **Disagreeing Agents:** {', '.join(consensus.disagreeing_agents)}"
 
             if not answer:
                 answer = "Goal execution completed. Please check task results for details."
@@ -142,3 +172,6 @@ class ConversationAgent(BaseAgent):
                 execution_time=elapsed,
                 confidence=0.0
             )
+
+    def handle_message(self, state: ExecutionState, message: Any, bus: Any) -> Any:
+        return None

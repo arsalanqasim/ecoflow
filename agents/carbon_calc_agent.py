@@ -1,7 +1,7 @@
 import logging
 import json
 import time
-from typing import List
+from typing import List, Any
 from agents.base_agent import BaseAgent, AgentMetadata
 from agents.shared_state import ExecutionState, Task, TaskResult, CarbonResult
 from api.database import SessionLocal
@@ -33,6 +33,27 @@ class CarbonCalculationAgent(BaseAgent):
             task_type = task.input_data.get("action")
             
             if task_type == "run_calculation_cycle":
+                # Query supplier verification data status via the communication bus before calculation
+                if hasattr(state, "bus") and state.bus is not None:
+                    from agents.collaboration import AgentRequest, AgentMessageType
+                    
+                    try:
+                        suppliers = db.query(Supplier).all()
+                        for supplier in suppliers:
+                            req = AgentRequest(
+                                sender="CarbonCalculationAgent",
+                                recipient="SupplierAgent",
+                                message_type=AgentMessageType.INFORMATION_REQUEST,
+                                content=f"Verify carbon intensity data for supplier: {supplier.name}",
+                                metadata={"supplier_id": supplier.supplier_id, "supplier_name": supplier.name}
+                            )
+                            resp = state.bus.send(req)
+                            if resp and hasattr(resp, "data") and resp.data:
+                                status = resp.data.get("status")
+                                self.memory[f"supplier_status_{supplier.supplier_id}"] = status
+                    except Exception as e:
+                        logger.warning(f"Failed to query supplier statuses on bus: {e}")
+
                 # 1. Fetch unprocessed shipments
                 unprocessed_shipments = db.query(Shipment).filter_by(is_processed=False).all()
                 if not unprocessed_shipments:
@@ -99,12 +120,21 @@ class CarbonCalculationAgent(BaseAgent):
                         shipment.is_processed = True
 
                     # Create Pydantic CarbonResult
+                    supplier_id = shipment.supplier_id if shipment else None
+                    status = self.memory.get(f"supplier_status_{supplier_id}", "Verified") if supplier_id else "Verified"
+                    
+                    res_confidence = 1.0 if method == "DIRECT_FACTOR" else 0.8
+                    if status in ["Estimated", "Unknown"]:
+                        res_confidence = min(res_confidence, 0.80)
+                    elif status == "Missing":
+                        res_confidence = min(res_confidence, 0.60)
+
                     carbon_results.append(
                         CarbonResult(
                             shipment_id=shipment_id,
                             emission_tCO2=emission_tCO2,
                             method=method,
-                            confidence=1.0 if method == "DIRECT_FACTOR" else 0.8
+                            confidence=res_confidence
                         )
                     )
 
@@ -117,6 +147,13 @@ class CarbonCalculationAgent(BaseAgent):
                 # Append results to shared state
                 state.carbon_results.extend(carbon_results)
 
+                statuses = [self.memory.get(f"supplier_status_{s.supplier_id}", "Verified") for s in unprocessed_shipments]
+                task_confidence = 0.95
+                if "Missing" in statuses or "Unknown" in statuses:
+                    task_confidence = 0.70
+                elif "Estimated" in statuses:
+                    task_confidence = 0.80
+
                 db.close()
                 elapsed = time.time() - start_time
                 return TaskResult(
@@ -127,7 +164,7 @@ class CarbonCalculationAgent(BaseAgent):
                         "carbon_results": [r.dict() for r in carbon_results]
                     },
                     execution_time=elapsed,
-                    confidence=0.95
+                    confidence=task_confidence
                 )
 
             elif task_type == "get_total_emissions":
@@ -263,3 +300,56 @@ class CarbonCalculationAgent(BaseAgent):
                     compliance_status=compliance
                 )
                 db.add(metric_row)
+
+    def handle_message(self, state: ExecutionState, message: Any, bus: Any) -> Any:
+        from agents.collaboration import AgentResponse, AgentMessageType
+        
+        if message.message_type == AgentMessageType.INFORMATION_REQUEST:
+            action = message.metadata.get("action")
+            if action == "get_highest_contributors":
+                from api.database import SessionLocal
+                from api.models import Emission, Shipment, Product
+                db = SessionLocal()
+                try:
+                    top_emissions = db.query(Emission).order_by(Emission.emission_tCO2.desc()).limit(3).all()
+                    contributors = []
+                    for e in top_emissions:
+                        shipment = db.query(Shipment).filter_by(shipment_id=e.shipment_id).first()
+                        product = db.query(Product).filter_by(product_id=shipment.product_id).first() if shipment else None
+                        contributors.append({
+                            "shipment_id": e.shipment_id,
+                            "hs_code": product.hs_code if product else "Unknown",
+                            "emissions": e.emission_tCO2
+                        })
+                    db.close()
+                    return AgentResponse(
+                        sender="CarbonCalculationAgent",
+                        recipient=message.sender,
+                        message_type=AgentMessageType.RESPONSE,
+                        content=f"Highest emissions contributors: " + (", ".join([f"{c['hs_code']}: {c['emissions']} tCO2" for c in contributors])),
+                        request_id=message.message_id,
+                        data={"contributors": contributors}
+                    )
+                except Exception as ex:
+                    db.close()
+                    logger.error(f"Error getting contributors in CarbonCalculationAgent: {ex}")
+                    return None
+            
+            elif action == "get_methodology_explanation":
+                return AgentResponse(
+                    sender="CarbonCalculationAgent",
+                    recipient=message.sender,
+                    message_type=AgentMessageType.RESPONSE,
+                    content="Scope 3 emissions calculated using product-level HS code emission factors where country matching is available, falling back to global/regional averages where country-specific data is missing.",
+                    request_id=message.message_id,
+                    data={"method": "DIRECT_FACTOR with FALLBACK_AVERAGE averages"}
+                )
+        elif message.message_type == AgentMessageType.VERIFICATION_REQUEST:
+            return AgentResponse(
+                sender="CarbonCalculationAgent",
+                recipient=message.sender,
+                message_type=AgentMessageType.RESPONSE,
+                content="Scope 3 emissions successfully computed. Direct factor calculation has high confidence; fallback averages have moderate confidence.",
+                request_id=message.message_id
+            )
+        return None

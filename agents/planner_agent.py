@@ -145,6 +145,54 @@ class PlannerAgent(BaseAgent):
         logger.info(f"Planned {len(state.current_tasks)} tasks with strategy: {state.execution_strategy}")
         return state
 
+    def _update_agent_reputation(self, state: ExecutionState, task: Task, result: TaskResult):
+        if not state.planner_learning:
+            state.planner_learning = {}
+        if "agent_reputation" not in state.planner_learning:
+            state.planner_learning["agent_reputation"] = {}
+            
+        reputation = state.planner_learning["agent_reputation"]
+        agent_name = task.assigned_agent
+        
+        if agent_name not in reputation:
+            reputation[agent_name] = {
+                "accuracy": 1.0,
+                "helpfulness": 1.0,
+                "confidence_calibration": 1.0,
+                "failed_recommendations": 0,
+                "successful_recommendations": 0,
+                "response_latency": 0.0,
+                "total_runs": 0
+            }
+            
+        rep = reputation[agent_name]
+        rep["total_runs"] += 1
+        runs = rep["total_runs"]
+        
+        # Update latency
+        rep["response_latency"] = ((rep["response_latency"] * (runs - 1)) + result.execution_time) / runs
+        
+        # Update accuracy
+        success_val = 1.0 if result.execution_status == "COMPLETED" else 0.0
+        rep["accuracy"] = ((rep["accuracy"] * (runs - 1)) + success_val) / runs
+        
+        # Update helpfulness
+        help_val = 1.0 if not result.need_planner_intervention else 0.5
+        if result.recommendations:
+            help_val = min(1.0, help_val + 0.1)
+        rep["helpfulness"] = ((rep["helpfulness"] * (runs - 1)) + help_val) / runs
+        
+        # Confidence calibration
+        calibration_error = abs(result.confidence - success_val)
+        calibration_score = max(0.0, 1.0 - calibration_error)
+        rep["confidence_calibration"] = ((rep["confidence_calibration"] * (runs - 1)) + calibration_score) / runs
+        
+        # Recommendations tracking
+        if result.execution_status == "COMPLETED" and result.recommendations:
+            rep["successful_recommendations"] += len(result.recommendations)
+        elif result.execution_status == "FAILED" and result.recommendations:
+            rep["failed_recommendations"] += len(result.recommendations)
+
     def evaluate_task_result(self, state: ExecutionState, task: Task, result: TaskResult) -> AgentDecision:
         logger.info(f"Executive evaluation for task {task.task_id} (status: {result.execution_status})")
         state.reasoning_iterations += 1
@@ -163,6 +211,9 @@ class PlannerAgent(BaseAgent):
             suggested_next_action=result.output_data.get("suggested_next_action", "")
         )
         state.observations.append(observation)
+
+        # Update reputation
+        self._update_agent_reputation(state, task, result)
 
         # 2. Accumulate Learning
         if result.execution_status == "FAILED":

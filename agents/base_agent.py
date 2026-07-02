@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional, Any
 from agents.shared_state import ExecutionState, Task, TaskResult
 
 class AgentMetadata(BaseModel):
@@ -13,6 +13,16 @@ class AgentMetadata(BaseModel):
     estimated_latency: float = 0.0
 
 class BaseAgent(ABC):
+    @property
+    def memory(self) -> dict:
+        if not hasattr(self, "_short_term_memory"):
+            self._short_term_memory = {}
+        return self._short_term_memory
+
+    def clear_memory(self) -> None:
+        if hasattr(self, "_short_term_memory"):
+            self._short_term_memory.clear()
+
     @property
     @abstractmethod
     def metadata(self) -> AgentMetadata:
@@ -44,3 +54,46 @@ class BaseAgent(ABC):
         Summarize the task outcome.
         """
         return f"{self.metadata.agent_name} successfully executed task {result.task_id}."
+
+    def handle_message(self, state: ExecutionState, message: Any, bus: Any) -> Any:
+        """
+        Handle incoming messages from the Agent Communication Bus.
+        Overridden by collaborating worker agents.
+        """
+        return None
+
+    def llm_reason(self, prompt: str, fallback_handler: Any) -> str:
+        """
+        Call Gemini client if available for reasoning, else run fallback handler.
+        """
+        import os
+        from google import genai
+        from google.genai.errors import APIError
+
+        client = getattr(self, "genai_client", None)
+        if not client:
+            api_key = os.getenv("GEMINI_API_KEY")
+            if api_key:
+                try:
+                    client = genai.Client()
+                    self.genai_client = client
+                except Exception:
+                    pass
+
+        if client:
+            try:
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=prompt
+                )
+                if response.text:
+                    return response.text.strip()
+            except Exception as e:
+                import logging
+                logging.getLogger(self.__class__.__name__).warning(
+                    f"Gemini API error in llm_reason: {e}. Running fallback."
+                )
+
+        if callable(fallback_handler):
+            return fallback_handler()
+        return str(fallback_handler)

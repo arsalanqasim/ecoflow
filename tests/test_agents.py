@@ -75,6 +75,17 @@ def test_compute_emissions_fallback_tool():
     assert result[0]["method"] == "FALLBACK_AVERAGE"
 
 def test_carbon_agent_run_cycle(db_session):
+    # Pre-clean leftover records from prior failed runs
+    from api.models import CBAMAudit
+    db_session.query(SupplierMetrics).filter(SupplierMetrics.supplier.has(name="Test Ingest Supplier")).delete(synchronize_session=False)
+    db_session.query(CBAMAudit).filter(CBAMAudit.emission.has(emission_tCO2=25.0)).delete(synchronize_session=False)
+    db_session.query(Emission).filter_by(emission_tCO2=25.0).delete()
+    db_session.query(Shipment).filter_by(quantity=5.0).delete()
+    db_session.query(EmissionFactor).filter_by(tCO2_per_unit=5.0).delete()
+    db_session.query(Product).filter_by(hs_code="999999").delete()
+    db_session.query(Supplier).filter_by(name="Test Ingest Supplier").delete()
+    db_session.commit()
+
     # 1. Setup a test supplier, product, and factor
     supplier = Supplier(name="Test Ingest Supplier", country="US", industry="Testing")
     db_session.add(supplier)
@@ -123,6 +134,8 @@ def test_carbon_agent_run_cycle(db_session):
     assert metrics.compliance_status == "COMPLIANT"
 
     # Clean up test records to maintain database sanity
+    from api.models import CBAMAudit
+    db_session.query(CBAMAudit).filter_by(emission_id=emission_record.emission_id).delete()
     db_session.delete(metrics)
     db_session.delete(emission_record)
     db_session.delete(shipment)
@@ -134,6 +147,14 @@ def test_carbon_agent_run_cycle(db_session):
 def test_cbam_agent_audit_cycle(db_session):
     from agents.cbam_agent import CBAMAuditAgent
     from api.models import CBAMAudit
+
+    # Pre-clean leftover records from prior failed runs
+    db_session.query(CBAMAudit).filter(CBAMAudit.emission.has(emission_tCO2=200.0)).delete(synchronize_session=False)
+    db_session.query(Emission).filter_by(emission_tCO2=200.0).delete()
+    db_session.query(Shipment).filter_by(quantity=100.0).delete()
+    db_session.query(Product).filter_by(hs_code="888888").delete()
+    db_session.query(Supplier).filter_by(name="Test CBAM Supplier").delete()
+    db_session.commit()
 
     # 1. Setup a test supplier, product, shipment, emission
     supplier = Supplier(name="Test CBAM Supplier", country="CN", industry="Testing")

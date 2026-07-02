@@ -11,13 +11,23 @@ logger = logging.getLogger("ExecutionEngine")
 class ExecutionEngine:
     def __init__(self, planner: PlannerAgent, agents: Dict[str, BaseAgent]):
         self.planner = planner
-        self.agents = agents
+        self.agents = agents.copy()
+        self.agents["PlannerAgent"] = planner
 
     def run(self, state: ExecutionState) -> ExecutionReport:
         start_time = time.time()
         state.current_status = "RUNNING"
         logger.info(f"Starting upgraded executive engine for goal: '{state.user_goal}'")
         
+        # Initialize Agent Communication Bus and clear memories
+        from agents.collaboration import AgentCommunicationBus
+        bus = AgentCommunicationBus(state, self.agents)
+        state.bus = bus
+
+        for agent in self.agents.values():
+            if hasattr(agent, "clear_memory"):
+                agent.clear_memory()
+                
         retries_count = 0
         
         while True:
@@ -177,6 +187,9 @@ class ExecutionEngine:
             if should_terminate:
                 break
 
+        # Trigger post-execution agent consensus compilation
+        self._evaluate_agent_consensus(state)
+
         # Calculate final metrics and build report
         total_duration = time.time() - start_time
         succeeded = sum([1 for t in state.current_tasks if t.execution_status == "COMPLETED"])
@@ -203,3 +216,88 @@ class ExecutionEngine:
         )
         
         return report
+
+    def _evaluate_agent_consensus(self, state: ExecutionState):
+        """
+        Synthesizes task observations, supplier responses, and agent conversations
+        to form a lightweight consensus report.
+        """
+        from agents.collaboration import AgentConsensus
+        
+        # Determine topic and compile opinions
+        topic = "Verification of Scope 3 Carbon Emissions Data"
+        supporting = []
+        disagreeing = []
+        scores = []
+        
+        # Check if we have carbon calculation task results
+        carbon_task = None
+        for t_id, res in state.task_history.items():
+            if "carbon_results" in res.output_data or "processed_count" in res.output_data:
+                carbon_task = res
+                break
+                
+        if not carbon_task:
+            return
+
+        # Carbon Calculation Agent opinion
+        supporting.append("CarbonCalculationAgent")
+        scores.append(carbon_task.confidence)
+        
+        # Supplier Agent opinion
+        supplier_verified = True
+        for resp in state.supplier_responses:
+            if resp.emission_data_status in ["Estimated", "Missing", "Unknown"]:
+                supplier_verified = False
+        
+        supporting.append("SupplierAgent")
+        scores.append(0.95 if supplier_verified else 0.75)
+        
+        # Compliance Agent opinion (checks critiques or negotiations)
+        has_critiques = len(state.agent_critiques) > 0
+        
+        # Compliance Agent confidence
+        compliance_task = None
+        for t_id, res in state.task_history.items():
+            if "compliance_results" in res.output_data:
+                compliance_task = res
+                break
+                
+        if compliance_task:
+            if has_critiques and compliance_task.confidence < 0.8:
+                disagreeing.append("ComplianceAgent")
+            else:
+                supporting.append("ComplianceAgent")
+            scores.append(compliance_task.confidence)
+            
+        # Optimization Agent opinion
+        opt_task = None
+        for t_id, res in state.task_history.items():
+            if "optimization_results" in res.output_data:
+                opt_task = res
+                break
+        if opt_task:
+            supporting.append("OptimizationAgent")
+            scores.append(opt_task.confidence)
+            
+        consensus_score = sum(scores) / len(scores) if scores else 1.0
+        
+        if supplier_verified:
+            final_rec = "Proceed with compliance certification. Supplier data verified."
+            evidence = f"Emissions compiled across shipments. Supplier data is fully verified."
+        else:
+            final_rec = "Verify supplier raw emissions logs before CBAM certification. Regional averages utilized."
+            evidence = f"Estimated/fallback factors used for some suppliers. Critique raised by ComplianceAgent on estimated data. Consensus reached with warnings."
+            
+        consensus = AgentConsensus(
+            topic=topic,
+            consensus_score=round(consensus_score, 2),
+            supporting_agents=supporting,
+            disagreeing_agents=disagreeing,
+            final_recommendation=final_rec,
+            evidence_summary=evidence
+        )
+        if not hasattr(state, "consensus_events") or state.consensus_events is None:
+            state.consensus_events = []
+        state.consensus_events.append(consensus)
+        logger.info(f"[CONSENSUS] Synthesized consensus (Score: {consensus_score}) for: '{topic}'")

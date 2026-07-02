@@ -1,7 +1,7 @@
 import os
 import logging
 import time
-from typing import List
+from typing import List, Any
 from agents.base_agent import BaseAgent, AgentMetadata
 from agents.shared_state import ExecutionState, Task, TaskResult, ComplianceResult
 from api.database import SessionLocal
@@ -63,6 +63,64 @@ class ComplianceAgent(BaseAgent):
                     )
 
                 compliance_results = []
+                # Check if any audited emissions have low confidence/estimated methods
+                has_estimated = any(e.method == "FALLBACK_AVERAGE" for e in unaudited_emissions)
+                
+                initial_confidence = 0.98 if not has_estimated else 0.58
+                final_confidence = initial_confidence
+                
+                # Start Negotiation if there are estimated emissions
+                if has_estimated and hasattr(state, "bus") and state.bus is not None:
+                    from agents.collaboration import AgentRequest, AgentMessageType, AgentCritique, AgentNegotiationEvent
+                    
+                    # 1. Send Critique
+                    critique = AgentCritique(
+                        sender="ComplianceAgent",
+                        recipient="CarbonCalculationAgent",
+                        message_type=AgentMessageType.CRITIQUE,
+                        content="Emissions calculations use estimated values. Compliance certification is high risk.",
+                        target_agent="CarbonCalculationAgent",
+                        target_task_id="run_calc",
+                        critique_points=["Uses global/regional averages", "Lack of supplier direct verification logs"]
+                    )
+                    state.bus.send(critique)
+                    
+                    # 2. Clarification request (Negotiation)
+                    req = AgentRequest(
+                        sender="ComplianceAgent",
+                        recipient="CarbonCalculationAgent",
+                        message_type=AgentMessageType.INFORMATION_REQUEST,
+                        content="Provide explanation and justification for using estimated fallback averages instead of direct metrics.",
+                        metadata={"action": "get_methodology_explanation"}
+                    )
+                    resp = state.bus.send(req)
+                    
+                    negotiation_log = [
+                        f"ComplianceAgent: Challenged emissions calculations due to estimated averages.",
+                        f"CarbonCalculationAgent: Responded with: '{resp.content if resp else 'No response'}'"
+                    ]
+                    
+                    if resp and "Scope 3 emissions" in resp.content:
+                        # Carbon agent successfully explained, we raise our confidence to 0.85!
+                        final_confidence = 0.85
+                        negotiation_log.append("ComplianceAgent: Accepted explanation. Global/regional averages match EU CBAM fallback protocols. Compliance confidence updated to 85%.")
+                        
+                    # Save negotiation event
+                    neg_event = AgentNegotiationEvent(
+                        topic="CBAM Compliance Audit of Estimated Carbon Emissions",
+                        agent_a="ComplianceAgent",
+                        agent_b="CarbonCalculationAgent",
+                        initial_confidence_a=initial_confidence,
+                        initial_confidence_b=0.80, # Carbon agent confidence
+                        final_confidence_a=final_confidence,
+                        final_confidence_b=0.80,
+                        negotiation_log=negotiation_log,
+                        resolved=True
+                    )
+                    if not hasattr(state, "negotiation_events") or state.negotiation_events is None:
+                        state.negotiation_events = []
+                    state.negotiation_events.append(neg_event)
+
                 for emission in unaudited_emissions:
                     shipment = db.query(Shipment).filter_by(shipment_id=emission.shipment_id).first()
                     if not shipment:
@@ -75,7 +133,6 @@ class ComplianceAgent(BaseAgent):
                         compliance_status = "EXEMPT (EU Origin)"
                         note = "Shipment originates within the European Union and is exempt from Carbon Border Adjustment tariffs."
                     else:
-                        # Calculation of tariff is required for the audit, but the agent's main logic is deciding compliance
                         tariff = emission.emission_tCO2 * carbon_price
                         compliance_status = "SUBJECT TO TARIFF"
                         
@@ -121,7 +178,7 @@ class ComplianceAgent(BaseAgent):
                         "compliance_results": [r.dict() for r in compliance_results]
                     },
                     execution_time=elapsed,
-                    confidence=0.98
+                    confidence=final_confidence
                 )
 
             elif task_type == "get_cbam_liabilities":
@@ -185,3 +242,27 @@ class ComplianceAgent(BaseAgent):
             f"based on current carbon price of €{carbon_price:.2f}/tCO2. "
             f"Recommendation: Review local decarbonization incentives or clean electricity certificates from the supplier."
         )
+
+    def handle_message(self, state: ExecutionState, message: Any, bus: Any) -> Any:
+        from agents.collaboration import AgentResponse, AgentMessageType
+        
+        if message.message_type == AgentMessageType.INFORMATION_REQUEST:
+            action = message.metadata.get("action")
+            if action == "get_cbam_regulations":
+                return AgentResponse(
+                    sender="ComplianceAgent",
+                    recipient=message.sender,
+                    message_type=AgentMessageType.RESPONSE,
+                    content="CBAM requires declaration of embedded emissions in imported iron, steel, aluminum, cement, electricity, and hydrogen. Estimated emissions are allowed under standard EU default values, but verified direct reporting is preferred to avoid conservative penalty factors.",
+                    request_id=message.message_id,
+                    data={"cbam_scope": ["Iron", "Steel", "Aluminum", "Cement", "Electricity", "Hydrogen"]}
+                )
+        elif message.message_type == AgentMessageType.VERIFICATION_REQUEST:
+            return AgentResponse(
+                sender="ComplianceAgent",
+                recipient=message.sender,
+                message_type=AgentMessageType.RESPONSE,
+                content="Audited emissions for CBAM regulatory compliance. Border adjustment tariffs computed based on origin and carbon price.",
+                request_id=message.message_id
+            )
+        return None

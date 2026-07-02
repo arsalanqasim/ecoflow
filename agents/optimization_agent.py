@@ -1,7 +1,7 @@
 import os
 import logging
 import time
-from typing import List
+from typing import List, Any
 from agents.base_agent import BaseAgent, AgentMetadata
 from agents.shared_state import ExecutionState, Task, TaskResult, OptimizationResult
 from google import genai
@@ -40,42 +40,72 @@ class OptimizationAgent(BaseAgent):
         logger.info(f"Executing task: {task.task_id} ({task.assigned_agent})")
         
         try:
-            # We can read from the state's carbon results
-            carbon_results = state.carbon_results
-            if not carbon_results:
-                elapsed = time.time() - start_time
-                return TaskResult(
-                    task_id=task.task_id,
-                    execution_status="COMPLETED",
-                    output_data={"optimization_results": [], "message": "No carbon results to optimize."},
-                    execution_time=elapsed,
-                    confidence=1.0
+            # Query the highest contributors from CarbonCalculationAgent via communication bus
+            if hasattr(state, "bus") and state.bus is not None:
+                from agents.collaboration import AgentRequest, AgentMessageType
+                req = AgentRequest(
+                    sender="OptimizationAgent",
+                    recipient="CarbonCalculationAgent",
+                    message_type=AgentMessageType.INFORMATION_REQUEST,
+                    content="Retrieve the top carbon emission contributors.",
+                    metadata={"action": "get_highest_contributors"}
                 )
+                resp = state.bus.send(req)
+                if resp and hasattr(resp, "data") and resp.data:
+                    self.memory["contributors"] = resp.data.get("contributors", [])
 
+            # Fallback to general state results if bus query didn't yield contributors
+            contributors = self.memory.get("contributors", [])
             optimization_results = []
             
-            # Formulate optimization recommendation for top emitters or shipments
-            # For simplicity, optimize the first 5 emitters or sum them
-            for cr in carbon_results[:5]:
-                # Propose road -> rail, or air -> sea, saving 40% emissions
-                original = cr.emission_tCO2
-                optimized = original * 0.6  # 40% savings
-                savings_t = original - optimized
-                
-                opt_res = OptimizationResult(
-                    shipment_id=cr.shipment_id,
-                    original_emissions=original,
-                    optimized_emissions=optimized,
-                    alternative_carrier="GreenFreight Eco-Rail",
-                    alternative_route="Direct Rail Transit Corridor",
-                    savings_tCO2=round(savings_t, 2),
-                    savings_percent=40.0
-                )
-                optimization_results.append(opt_res)
+            if contributors:
+                for c in contributors:
+                    original = c["emissions"]
+                    optimized = original * 0.6  # 40% savings
+                    savings_t = original - optimized
+                    
+                    opt_res = OptimizationResult(
+                        shipment_id=c["shipment_id"],
+                        original_emissions=original,
+                        optimized_emissions=optimized,
+                        alternative_carrier="GreenFreight Eco-Rail",
+                        alternative_route="Direct Rail Transit Corridor",
+                        savings_tCO2=round(savings_t, 2),
+                        savings_percent=40.0
+                    )
+                    optimization_results.append(opt_res)
+            else:
+                carbon_results = state.carbon_results
+                if not carbon_results:
+                    elapsed = time.time() - start_time
+                    return TaskResult(
+                        task_id=task.task_id,
+                        execution_status="COMPLETED",
+                        output_data={"optimization_results": [], "message": "No carbon results to optimize."},
+                        execution_time=elapsed,
+                        confidence=1.0
+                    )
+                for cr in carbon_results[:5]:
+                    original = cr.emission_tCO2
+                    optimized = original * 0.6
+                    savings_t = original - optimized
+                    
+                    opt_res = OptimizationResult(
+                        shipment_id=cr.shipment_id,
+                        original_emissions=original,
+                        optimized_emissions=optimized,
+                        alternative_carrier="GreenFreight Eco-Rail",
+                        alternative_route="Direct Rail Transit Corridor",
+                        savings_tCO2=round(savings_t, 2),
+                        savings_percent=40.0
+                    )
+                    optimization_results.append(opt_res)
 
-            # Generate optimization text summary using Gemini if available
             summary = self.generate_optimization_summary(optimization_results)
             state.optimization_results.extend(optimization_results)
+            
+            recs = ["Transition high-emission long-haul shipments to rail networks", "Audit carrier fuel efficiency"]
+            follow_ups = [{"task_id": "carrier_audit", "assigned_agent": "SupplierAgent", "input_data": {"action": "audit_carrier"}}]
             
             elapsed = time.time() - start_time
             return TaskResult(
@@ -86,7 +116,9 @@ class OptimizationAgent(BaseAgent):
                     "optimization_summary": summary
                 },
                 execution_time=elapsed,
-                confidence=0.9
+                confidence=0.95,
+                recommendations=recs,
+                suggested_follow_up_tasks=follow_ups
             )
 
         except Exception as e:
@@ -130,3 +162,16 @@ class OptimizationAgent(BaseAgent):
             f"to save approximately {total_savings:.2f} tCO2 (a 40% reduction). Recommendation: Re-route long-haul "
             f"segments through GreenFreight Eco-Rail networks."
         )
+
+    def handle_message(self, state: ExecutionState, message: Any, bus: Any) -> Any:
+        from agents.collaboration import AgentResponse, AgentMessageType
+        
+        if message.message_type == AgentMessageType.VERIFICATION_REQUEST:
+            return AgentResponse(
+                sender="OptimizationAgent",
+                recipient=message.sender,
+                message_type=AgentMessageType.RESPONSE,
+                content="Identified logistics re-routing options. Eco-rail alternatives present up to 40% carbon savings.",
+                request_id=message.message_id
+            )
+        return None

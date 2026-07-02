@@ -1,6 +1,10 @@
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+from agents.collaboration import (
+    AgentMessage, AgentRequest, AgentResponse, AgentCritique,
+    AgentConsensus, AgentNegotiationEvent
+)
 
 class CarbonResult(BaseModel):
     shipment_id: int
@@ -126,6 +130,23 @@ class ExecutionTimelineEvent(BaseModel):
     message: str
 
 class ExecutionState(BaseModel):
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
+    
+    # Runtime communication bus (not serialized/stored in DB)
+    bus: Optional[Any] = Field(default=None, exclude=True)
+
+    # Collaborative timeline models
+    agent_conversations: List[Any] = Field(default_factory=list)
+    agent_requests: List[Any] = Field(default_factory=list)
+    agent_responses: List[Any] = Field(default_factory=list)
+    agent_critiques: List[Any] = Field(default_factory=list)
+    consensus_events: List[AgentConsensus] = Field(default_factory=list)
+    negotiation_events: List[AgentNegotiationEvent] = Field(default_factory=list)
+    knowledge_requests: List[Any] = Field(default_factory=list)
+    escalations: List[Any] = Field(default_factory=list)
+
     user_goal: str
     uploaded_documents: List[str] = []
     current_tasks: List[Task] = []

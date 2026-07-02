@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import List, Optional
+from typing import List, Optional, Any
 from agents.base_agent import BaseAgent, AgentMetadata
 from agents.shared_state import ExecutionState, Task, TaskResult, SupplierResponse
 from api.database import SessionLocal
@@ -131,3 +131,75 @@ class SupplierAgent(BaseAgent):
                 execution_time=elapsed,
                 confidence=0.0
             )
+
+    def handle_message(self, state: ExecutionState, message: Any, bus: Any) -> Any:
+        from agents.collaboration import AgentResponse, AgentMessageType
+        
+        if message.message_type in [AgentMessageType.INFORMATION_REQUEST, AgentMessageType.EVIDENCE_REQUEST]:
+            supplier_id = message.metadata.get("supplier_id")
+            supplier_name = message.metadata.get("supplier_name")
+            
+            from api.database import SessionLocal
+            from api.models import Supplier, Shipment, Emission
+            
+            db = SessionLocal()
+            try:
+                if supplier_id:
+                    supplier = db.query(Supplier).filter_by(supplier_id=supplier_id).first()
+                elif supplier_name:
+                    supplier = db.query(Supplier).filter(Supplier.name.like(f"%{supplier_name}%")).first()
+                else:
+                    supplier = None
+                    
+                if not supplier:
+                    db.close()
+                    return AgentResponse(
+                        sender="SupplierAgent",
+                        recipient=message.sender,
+                        message_type=AgentMessageType.RESPONSE,
+                        content="Supplier not found.",
+                        request_id=message.message_id,
+                        data={"status": "Unknown", "confidence": 0.5}
+                    )
+                    
+                shipments = db.query(Shipment).filter_by(supplier_id=supplier.supplier_id).all()
+                if not shipments:
+                    status = "Missing"
+                    confidence = 0.5
+                else:
+                    shipment_ids = [s.shipment_id for s in shipments]
+                    emissions = db.query(Emission).filter(Emission.shipment_id.in_(shipment_ids)).all()
+                    if not emissions:
+                        status = "Unknown"
+                        confidence = 0.5
+                    else:
+                        methods = [e.method for e in emissions]
+                        if "FALLBACK_AVERAGE" in methods:
+                            status = "Estimated"
+                            confidence = 0.8
+                        else:
+                            status = "Verified"
+                            confidence = 1.0
+                            
+                db.close()
+                return AgentResponse(
+                    sender="SupplierAgent",
+                    recipient=message.sender,
+                    message_type=AgentMessageType.RESPONSE,
+                    content=f"Supplier {supplier.name} carbon status is {status} (confidence {confidence}).",
+                    request_id=message.message_id,
+                    data={"supplier_name": supplier.name, "status": status, "confidence": confidence}
+                )
+            except Exception as e:
+                db.close()
+                logger.error(f"Error handling message in SupplierAgent: {e}")
+                return None
+        elif message.message_type == AgentMessageType.VERIFICATION_REQUEST:
+            return AgentResponse(
+                sender="SupplierAgent",
+                recipient=message.sender,
+                message_type=AgentMessageType.RESPONSE,
+                content="Supplier database contains verified carbon logs for some, but fallback estimates are active for others.",
+                request_id=message.message_id
+            )
+        return None
