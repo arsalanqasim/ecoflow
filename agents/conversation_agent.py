@@ -150,6 +150,15 @@ class ConversationAgent(BaseAgent):
                 if consensus.disagreeing_agents:
                     answer += f"\n- **Disagreeing Agents:** {', '.join(consensus.disagreeing_agents)}"
 
+            # Append MCP Tool Chains summary
+            if answer and getattr(state, "mcp_tool_chains", None):
+                answer += f"\n\n**MCP Tool Execution Trace:**\n"
+                for chain in state.mcp_tool_chains:
+                    matching_dec = next((d for d in state.mcp_selection_decisions if d["selected_tool"] == chain["tool_name"]), None)
+                    reason = matching_dec["reasoning"] if matching_dec else "Discovered and executed dynamically."
+                    answer += f"- **{chain['agent_name']}** executed `{chain['tool_name']}`\n"
+                    answer += f"  - *Reasoning:* {reason}\n"
+
             if not answer:
                 answer = "Goal execution completed. Please check task results for details."
 

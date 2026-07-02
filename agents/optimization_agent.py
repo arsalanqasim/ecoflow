@@ -54,23 +54,28 @@ class OptimizationAgent(BaseAgent):
                 if resp and hasattr(resp, "data") and resp.data:
                     self.memory["contributors"] = resp.data.get("contributors", [])
 
-            # Fallback to general state results if bus query didn't yield contributors
-            contributors = self.memory.get("contributors", [])
+            # Discover logistics optimization tool
+            opt_tool = self.discover_and_select_tool("optimize_logistics", state)
+            
             optimization_results = []
             
             if contributors:
                 for c in contributors:
-                    original = c["emissions"]
-                    optimized = original * 0.6  # 40% savings
-                    savings_t = original - optimized
+                    shipment_id = c["shipment_id"]
+                    opt_res_data = self.execute_mcp_tool(
+                        opt_tool,
+                        {"shipment_id": shipment_id},
+                        state
+                    )
+                    self.validate_tool_output(opt_tool, opt_res_data, state)
                     
                     opt_res = OptimizationResult(
-                        shipment_id=c["shipment_id"],
-                        original_emissions=original,
-                        optimized_emissions=optimized,
-                        alternative_carrier="GreenFreight Eco-Rail",
+                        shipment_id=shipment_id,
+                        original_emissions=opt_res_data["original_emissions"],
+                        optimized_emissions=opt_res_data["optimized_emissions"],
+                        alternative_carrier=opt_res_data["alternative_carrier"],
                         alternative_route="Direct Rail Transit Corridor",
-                        savings_tCO2=round(savings_t, 2),
+                        savings_tCO2=opt_res_data["savings_tCO2"],
                         savings_percent=40.0
                     )
                     optimization_results.append(opt_res)
@@ -86,17 +91,20 @@ class OptimizationAgent(BaseAgent):
                         confidence=1.0
                     )
                 for cr in carbon_results[:5]:
-                    original = cr.emission_tCO2
-                    optimized = original * 0.6
-                    savings_t = original - optimized
+                    opt_res_data = self.execute_mcp_tool(
+                        opt_tool,
+                        {"shipment_id": cr.shipment_id},
+                        state
+                    )
+                    self.validate_tool_output(opt_tool, opt_res_data, state)
                     
                     opt_res = OptimizationResult(
                         shipment_id=cr.shipment_id,
-                        original_emissions=original,
-                        optimized_emissions=optimized,
-                        alternative_carrier="GreenFreight Eco-Rail",
+                        original_emissions=opt_res_data["original_emissions"],
+                        optimized_emissions=opt_res_data["optimized_emissions"],
+                        alternative_carrier=opt_res_data["alternative_carrier"],
                         alternative_route="Direct Rail Transit Corridor",
-                        savings_tCO2=round(savings_t, 2),
+                        savings_tCO2=opt_res_data["savings_tCO2"],
                         savings_percent=40.0
                     )
                     optimization_results.append(opt_res)

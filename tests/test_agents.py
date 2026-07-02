@@ -77,13 +77,13 @@ def test_compute_emissions_fallback_tool():
 def test_carbon_agent_run_cycle(db_session):
     # Pre-clean leftover records from prior failed runs
     from api.models import CBAMAudit
-    db_session.query(SupplierMetrics).filter(SupplierMetrics.supplier.has(name="Test Ingest Supplier")).delete(synchronize_session=False)
-    db_session.query(CBAMAudit).filter(CBAMAudit.emission.has(emission_tCO2=25.0)).delete(synchronize_session=False)
-    db_session.query(Emission).filter_by(emission_tCO2=25.0).delete()
-    db_session.query(Shipment).filter_by(quantity=5.0).delete()
-    db_session.query(EmissionFactor).filter_by(tCO2_per_unit=5.0).delete()
-    db_session.query(Product).filter_by(hs_code="999999").delete()
-    db_session.query(Supplier).filter_by(name="Test Ingest Supplier").delete()
+    db_session.query(CBAMAudit).delete()
+    db_session.query(Emission).delete()
+    db_session.query(SupplierMetrics).delete()
+    db_session.query(Shipment).delete()
+    db_session.query(EmissionFactor).delete()
+    db_session.query(Product).delete()
+    db_session.query(Supplier).delete()
     db_session.commit()
 
     # 1. Setup a test supplier, product, and factor
@@ -149,11 +149,12 @@ def test_cbam_agent_audit_cycle(db_session):
     from api.models import CBAMAudit
 
     # Pre-clean leftover records from prior failed runs
-    db_session.query(CBAMAudit).filter(CBAMAudit.emission.has(emission_tCO2=200.0)).delete(synchronize_session=False)
-    db_session.query(Emission).filter_by(emission_tCO2=200.0).delete()
-    db_session.query(Shipment).filter_by(quantity=100.0).delete()
-    db_session.query(Product).filter_by(hs_code="888888").delete()
-    db_session.query(Supplier).filter_by(name="Test CBAM Supplier").delete()
+    db_session.query(CBAMAudit).delete()
+    db_session.query(Emission).delete()
+    db_session.query(SupplierMetrics).delete()
+    db_session.query(Shipment).delete()
+    db_session.query(Product).delete()
+    db_session.query(Supplier).delete()
     db_session.commit()
 
     # 1. Setup a test supplier, product, shipment, emission
@@ -176,6 +177,10 @@ def test_cbam_agent_audit_cycle(db_session):
         is_processed=True
     )
     db_session.add(shipment)
+    db_session.commit()
+
+    # Clean up any leftover emission referencing this shipment ID
+    db_session.query(Emission).filter_by(shipment_id=shipment.shipment_id).delete()
     db_session.commit()
 
     emission = Emission(
@@ -204,6 +209,9 @@ def test_cbam_agent_audit_cycle(db_session):
     db_session.delete(emission)
     db_session.delete(shipment)
     db_session.delete(product)
+    metrics = db_session.query(SupplierMetrics).filter_by(supplier_id=supplier.supplier_id).first()
+    if metrics:
+        db_session.delete(metrics)
     db_session.delete(supplier)
     db_session.commit()
 

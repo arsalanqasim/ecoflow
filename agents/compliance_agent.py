@@ -121,6 +121,9 @@ class ComplianceAgent(BaseAgent):
                         state.negotiation_events = []
                     state.negotiation_events.append(neg_event)
 
+                # Discover the CBAM tariff auditing tool
+                audit_tool = self.discover_and_select_tool("audit_tariffs", state)
+
                 for emission in unaudited_emissions:
                     shipment = db.query(Shipment).filter_by(shipment_id=emission.shipment_id).first()
                     if not shipment:
@@ -133,7 +136,15 @@ class ComplianceAgent(BaseAgent):
                         compliance_status = "EXEMPT (EU Origin)"
                         note = "Shipment originates within the European Union and is exempt from Carbon Border Adjustment tariffs."
                     else:
-                        tariff = emission.emission_tCO2 * carbon_price
+                        # Call the tool to perform the audit
+                        audit_res = self.execute_mcp_tool(
+                            audit_tool,
+                            {"shipment_id": shipment.shipment_id, "carbon_price": carbon_price},
+                            state
+                        )
+                        self.validate_tool_output(audit_tool, audit_res, state)
+                        
+                        tariff = audit_res.get("tariff_due_eur", 0.0)
                         compliance_status = "SUBJECT TO TARIFF"
                         
                         product = db.query(Product).filter_by(product_id=shipment.product_id).first()
@@ -147,12 +158,18 @@ class ComplianceAgent(BaseAgent):
                             carbon_price=carbon_price
                         )
 
-                    audit = CBAMAudit(
-                        emission_id=emission.emission_id,
-                        tariff_due_eur=tariff,
-                        compliance_status=f"[{compliance_status}] {note}"
-                    )
-                    db.add(audit)
+                    # Update the DB record's status field (the tool created/committed the CBAMAudit row, but let's update compliance_status text)
+                    from api.models import CBAMAudit as CBAMAuditModel
+                    audit = db.query(CBAMAuditModel).filter_by(emission_id=emission.emission_id).first()
+                    if audit:
+                        audit.compliance_status = f"[{compliance_status}] {note}"
+                    else:
+                        audit = CBAMAuditModel(
+                            emission_id=emission.emission_id,
+                            tariff_due_eur=tariff,
+                            compliance_status=f"[{compliance_status}] {note}"
+                        )
+                        db.add(audit)
                     
                     compliance_results.append(
                         ComplianceResult(

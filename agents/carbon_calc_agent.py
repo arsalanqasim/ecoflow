@@ -6,8 +6,6 @@ from agents.base_agent import BaseAgent, AgentMetadata
 from agents.shared_state import ExecutionState, Task, TaskResult, CarbonResult
 from api.database import SessionLocal
 from api.models import Shipment, EmissionFactor, Emission, SupplierMetrics, Supplier
-from fastmcp.data_processing_server import compute_emissions_join
-from fastmcp.model_serving_server import predict_emissions_forecast
 
 logger = logging.getLogger("CarbonCalculationAgent")
 
@@ -33,27 +31,9 @@ class CarbonCalculationAgent(BaseAgent):
             task_type = task.input_data.get("action")
             
             if task_type == "run_calculation_cycle":
-                # Query supplier verification data status via the communication bus before calculation
-                if hasattr(state, "bus") and state.bus is not None:
-                    from agents.collaboration import AgentRequest, AgentMessageType
-                    
-                    try:
-                        suppliers = db.query(Supplier).all()
-                        for supplier in suppliers:
-                            req = AgentRequest(
-                                sender="CarbonCalculationAgent",
-                                recipient="SupplierAgent",
-                                message_type=AgentMessageType.INFORMATION_REQUEST,
-                                content=f"Verify carbon intensity data for supplier: {supplier.name}",
-                                metadata={"supplier_id": supplier.supplier_id, "supplier_name": supplier.name}
-                            )
-                            resp = state.bus.send(req)
-                            if resp and hasattr(resp, "data") and resp.data:
-                                status = resp.data.get("status")
-                                self.memory[f"supplier_status_{supplier.supplier_id}"] = status
-                    except Exception as e:
-                        logger.warning(f"Failed to query supplier statuses on bus: {e}")
-
+                # Discover get_supplier_carbon_status tool
+                supplier_tool = self.discover_and_select_tool("supplier carbon status", state)
+                
                 # 1. Fetch unprocessed shipments
                 unprocessed_shipments = db.query(Shipment).filter_by(is_processed=False).all()
                 if not unprocessed_shipments:
@@ -67,17 +47,6 @@ class CarbonCalculationAgent(BaseAgent):
                         confidence=1.0
                     )
 
-                # Serialize shipments
-                shipments_data = [
-                    {
-                        "shipment_id": s.shipment_id,
-                        "product_id": s.product_id,
-                        "quantity": s.quantity,
-                        "origin_country": s.origin_country
-                    }
-                    for s in unprocessed_shipments
-                ]
-                
                 # 2. Fetch all emission factors
                 all_factors = db.query(EmissionFactor).all()
                 factors_data = [
@@ -89,15 +58,77 @@ class CarbonCalculationAgent(BaseAgent):
                     for f in all_factors
                 ]
 
-                # 3. Call FastMCP tool
+                # Run supplier status check for each shipment's supplier
+                supplier_statuses = {}
+                for s in unprocessed_shipments:
+                    supplier_id = s.supplier_id
+                    if supplier_id not in supplier_statuses:
+                        status_res = self.execute_mcp_tool(
+                            supplier_tool, 
+                            {"supplier_id": supplier_id}, 
+                            state
+                        )
+                        self.validate_tool_output(supplier_tool, status_res, state)
+                        status = status_res.get("status", "Verified")
+                        supplier_statuses[supplier_id] = status
+                        self.memory[f"supplier_status_{supplier_id}"] = status
+                        
+                        # Trigger Fallback if supplier status is incomplete/estimated/missing
+                        if status in ["Estimated", "Missing", "Unknown"]:
+                            grid_tool = self.discover_and_select_tool("regional grid intensity", state)
+                            grid_res = self.execute_mcp_tool(
+                                grid_tool, 
+                                {"country_code": s.origin_country}, 
+                                state
+                            )
+                            self.validate_tool_output(grid_tool, grid_res, state)
+                            grid_intensity = grid_res.get("grid_intensity_tCO2_per_MWh", 0.4)
+                            
+                            # Log fallback event
+                            state.mcp_fallback_events.append({
+                                "agent_name": self.metadata.agent_name,
+                                "type": "SUPPLIER_DATA_MISSING",
+                                "supplier_id": supplier_id,
+                                "country": s.origin_country,
+                                "fallback_tool": grid_tool.name,
+                                "fallback_value": grid_intensity,
+                                "timestamp": time.time()
+                            })
+                            
+                            # Chain grid intensity: Append a temporary factor record for this country factor fallback
+                            factors_data.append({
+                                "product_id": s.product_id,
+                                "country": s.origin_country,
+                                "tCO2_per_unit": grid_intensity
+                            })
+
+                # Serialize shipments
+                shipments_data = [
+                    {
+                        "shipment_id": s.shipment_id,
+                        "product_id": s.product_id,
+                        "quantity": s.quantity,
+                        "origin_country": s.origin_country
+                    }
+                    for s in unprocessed_shipments
+                ]
+
+                # Discover and run emissions join calculation tool
+                calc_tool = self.discover_and_select_tool("calc emissions", state)
+                
                 shipments_json = json.dumps(shipments_data)
                 factors_json = json.dumps(factors_data)
                 
-                results_json = compute_emissions_join(shipments_json, factors_json)
-                results = json.loads(results_json)
+                results_json = self.execute_mcp_tool(
+                    calc_tool, 
+                    {"shipments_json": shipments_json, "factors_json": factors_json}, 
+                    state
+                )
+                self.validate_tool_output(calc_tool, results_json, state)
                 
+                results = json.loads(results_json)
                 if isinstance(results, dict) and results.get("status") == "error":
-                    raise ValueError(f"FastMCP calculation failed: {results.get('message')}")
+                    raise ValueError(f"MCP calculation failed: {results.get('message')}")
 
                 # 4. Save results to Database & State
                 carbon_results = []
@@ -147,7 +178,7 @@ class CarbonCalculationAgent(BaseAgent):
                 # Append results to shared state
                 state.carbon_results.extend(carbon_results)
 
-                statuses = [self.memory.get(f"supplier_status_{s.supplier_id}", "Verified") for s in unprocessed_shipments]
+                statuses = list(supplier_statuses.values())
                 task_confidence = 0.95
                 if "Missing" in statuses or "Unknown" in statuses:
                     task_confidence = 0.70
@@ -234,9 +265,15 @@ class CarbonCalculationAgent(BaseAgent):
                         confidence=0.0
                     )
 
-                forecast_json = predict_emissions_forecast(json.dumps(historical_list), steps=4)
-                forecast_res = json.loads(forecast_json)
+                forecast_tool = self.discover_and_select_tool("run_forecast", state)
+                forecast_json = self.execute_mcp_tool(
+                    forecast_tool, 
+                    {"historical_emissions_json": json.dumps(historical_list), "steps": 4}, 
+                    state
+                )
+                self.validate_tool_output(forecast_tool, forecast_json, state)
                 
+                forecast_res = json.loads(forecast_json)
                 if isinstance(forecast_res, dict) and forecast_res.get("status") == "error":
                     raise ValueError(f"Forecasting calculation failed: {forecast_res.get('message')}")
 

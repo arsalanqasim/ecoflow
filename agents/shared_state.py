@@ -147,6 +147,15 @@ class ExecutionState(BaseModel):
     knowledge_requests: List[Any] = Field(default_factory=list)
     escalations: List[Any] = Field(default_factory=list)
 
+    # MCP session and tracing models
+    mcp_session: Optional[Any] = None
+    mcp_discovery_events: List[Any] = Field(default_factory=list)
+    mcp_selection_decisions: List[Any] = Field(default_factory=list)
+    mcp_tool_chains: List[Any] = Field(default_factory=list)
+    mcp_fallback_events: List[Any] = Field(default_factory=list)
+    mcp_validation_events: List[Any] = Field(default_factory=list)
+    mcp_performance_metrics: Dict[str, Any] = Field(default_factory=dict)
+
     user_goal: str
     uploaded_documents: List[str] = []
     current_tasks: List[Task] = []
