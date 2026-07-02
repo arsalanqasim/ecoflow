@@ -134,6 +134,8 @@ class ExecutionState(BaseModel):
         "arbitrary_types_allowed": True
     }
     
+    run_id: Optional[str] = None
+    
     # Runtime communication bus (not serialized/stored in DB)
     bus: Optional[Any] = Field(default=None, exclude=True)
 

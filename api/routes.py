@@ -1,8 +1,10 @@
 import os
 import shutil
+from pydantic import BaseModel
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from api.schemas import QueryRequest, QueryResponse, DashboardSummaryResponse
 from api.database import SessionLocal
+from api import observability
 from api.models import Emission, CBAMAudit, SupplierMetrics, Supplier
 from agents.ai_assistant_agent import AIAssistantAgent
 from agents.data_ingest_agent import DataIngestAgent
@@ -128,3 +130,25 @@ async def get_dashboard_summary():
         raise HTTPException(status_code=500, detail=f"Database aggregation failed: {e}")
     finally:
         db.close()
+
+# --- Observability Endpoints ---
+
+class ObservabilityRunRequest(BaseModel):
+    scenario: str
+
+@router.get("/observability/runs")
+async def list_observability_runs():
+    return observability.list_runs()
+
+@router.post("/observability/run")
+async def create_observability_run(payload: ObservabilityRunRequest):
+    run_id = observability.create_run(payload.scenario)
+    return {"run_id": run_id, "status": "success"}
+
+@router.get("/observability/run/{run_id}")
+async def get_observability_run(run_id: str):
+    run_data = observability.get_run(run_id)
+    if not run_data:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return run_data
+
