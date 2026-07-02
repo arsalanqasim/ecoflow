@@ -1,6 +1,7 @@
 import time
 import logging
 from typing import Dict, List
+from concurrent.futures import ThreadPoolExecutor
 from agents.base_agent import BaseAgent
 from agents.shared_state import ExecutionState, Task, TaskResult, AgentDecision, ExecutionTimelineEvent, ExecutionReport
 from agents.planner_agent import PlannerAgent
@@ -15,7 +16,7 @@ class ExecutionEngine:
     def run(self, state: ExecutionState) -> ExecutionReport:
         start_time = time.time()
         state.current_status = "RUNNING"
-        logger.info(f"Starting execution engine for goal: '{state.user_goal}'")
+        logger.info(f"Starting upgraded executive engine for goal: '{state.user_goal}'")
         
         retries_count = 0
         
@@ -46,143 +47,134 @@ class ExecutionEngine:
                     logger.info("All tasks executed successfully.")
                     break
             
-            # Sort by priority (higher priority first)
+            # Sort ready tasks by priority (higher priority first)
             ready_tasks.sort(key=lambda t: t.priority, reverse=True)
-            task_to_run = ready_tasks[0]
             
-            task_to_run.execution_status = "RUNNING"
+            # Log scheduling timeline event
+            logger.info(f"Scheduling {len(ready_tasks)} ready tasks: {[t.task_id for t in ready_tasks]}")
             
-            # Log timeline event
-            start_event = ExecutionTimelineEvent(
-                agent_name=task_to_run.assigned_agent,
-                action="start",
-                message=f"Starting task {task_to_run.task_id} assigned to {task_to_run.assigned_agent}."
-            )
-            state.execution_timeline.append(start_event)
-            
-            # Resolve target agent
-            agent = self.agents.get(task_to_run.assigned_agent)
-            if not agent:
-                err_msg = f"Agent '{task_to_run.assigned_agent}' not registered in engine."
-                task_result = TaskResult(
-                    task_id=task_to_run.task_id,
-                    execution_status="FAILED",
-                    error_message=err_msg,
-                    execution_time=0.0
+            # Define helper function to execute a single task in thread pool
+            def execute_single_task(t: Task) -> tuple[Task, TaskResult]:
+                # Log start event
+                start_event = ExecutionTimelineEvent(
+                    agent_name=t.assigned_agent,
+                    action="start",
+                    message=f"Starting task {t.task_id} assigned to {t.assigned_agent} (Priority: {t.priority})."
                 )
-            else:
+                state.execution_timeline.append(start_event)
+                
+                agent = self.agents.get(t.assigned_agent)
+                if not agent:
+                    return t, TaskResult(
+                        task_id=t.task_id,
+                        execution_status="FAILED",
+                        error_message=f"Agent '{t.assigned_agent}' not registered in engine."
+                    )
                 try:
-                    # Execute planning phase
-                    task_to_run = agent.plan(state, task_to_run)
+                    # Plan
+                    t_planned = agent.plan(state, t)
                     
-                    # Execute task
+                    # Execute
                     t_start = time.time()
-                    task_result = agent.execute(state, task_to_run)
+                    task_res = agent.execute(state, t_planned)
                     t_elapsed = time.time() - t_start
                     
-                    if task_result.execution_time == 0.0:
-                        task_result.execution_time = t_elapsed
-                    
-                    # Validate output
-                    is_valid = agent.validate(state, task_result)
-                    if not is_valid:
-                        task_result.execution_status = "FAILED"
-                        task_result.error_message = "Output validation rules failed."
+                    if task_res.execution_time == 0.0:
+                        task_res.execution_time = t_elapsed
                         
+                    # Validate
+                    is_valid = agent.validate(state, task_res)
+                    if not is_valid:
+                        task_res.execution_status = "FAILED"
+                        task_res.error_message = "Output validation rules failed."
+                        
+                    return t_planned, task_res
                 except Exception as ex:
-                    task_result = TaskResult(
-                        task_id=task_to_run.task_id,
+                    return t, TaskResult(
+                        task_id=t.task_id,
                         execution_status="FAILED",
                         error_message=str(ex),
-                        execution_time=time.time() - t_start,
                         confidence=0.0
                     )
 
-            # Record task metadata back onto Task definition
-            task_to_run.execution_time = task_result.execution_time
-            task_to_run.confidence = task_result.confidence
-            
-            # 3. Active feedback loop: Ask Planner to evaluate results and determine the next step
-            decision = self.planner.evaluate_task_result(state, task_to_run, task_result)
-            logger.info(f"Planner decision for {task_to_run.task_id}: {decision.decision} - {decision.reasoning}")
-            
-            if decision.decision == "CONTINUE":
-                task_to_run.execution_status = "COMPLETED"
-                state.task_history[task_to_run.task_id] = task_result
-                state.confidence_history.append(task_result.confidence)
+            # 3. Schedule all ready tasks in parallel
+            with ThreadPoolExecutor(max_workers=max(1, len(ready_tasks))) as executor:
+                futures = [executor.submit(execute_single_task, t) for t in ready_tasks]
+                batch_results = [f.result() for f in futures]
+
+            # 4. Sequentially process outcomes and consult Planner loop
+            should_terminate = False
+            for t_run, t_res in batch_results:
+                # Update task execution details
+                t_run.execution_time = t_res.execution_time
+                t_run.confidence = t_res.confidence
                 
-                end_event = ExecutionTimelineEvent(
-                    agent_name=task_to_run.assigned_agent,
-                    action="completed",
-                    duration=task_result.execution_time,
-                    message=f"Task {task_to_run.task_id} completed. Decision: CONTINUE."
-                )
-                state.execution_timeline.append(end_event)
+                # Active feedback loop: Ask Planner to evaluate result
+                decision = self.planner.evaluate_task_result(state, t_run, t_res)
+                logger.info(f"Planner decision for {t_run.task_id}: {decision.decision} - {decision.reasoning}")
                 
-            elif decision.decision == "RETRY":
-                task_to_run.execution_status = "PENDING"
-                task_to_run.retry_count += 1
-                retries_count += 1
-                
-                retry_event = ExecutionTimelineEvent(
-                    agent_name=task_to_run.assigned_agent,
-                    action="retry",
-                    message=f"Task {task_to_run.task_id} failed. Retrying (Attempt {task_to_run.retry_count})."
-                )
-                state.execution_timeline.append(retry_event)
-                
-            elif decision.decision == "SKIP":
-                task_to_run.execution_status = "SKIPPED"
-                state.task_history[task_to_run.task_id] = task_result
-                
-                skip_event = ExecutionTimelineEvent(
-                    agent_name=task_to_run.assigned_agent,
-                    action="skipped",
-                    message=f"Task {task_to_run.task_id} skipped by Planner decision."
-                )
-                state.execution_timeline.append(skip_event)
-                
-            elif decision.decision == "INSERT_TASKS":
-                task_to_run.execution_status = "COMPLETED"
-                state.task_history[task_to_run.task_id] = task_result
-                
-                if decision.next_recommended_agent:
-                    new_task_id = f"inserted_{decision.next_recommended_agent.lower()}_{len(state.current_tasks)}"
-                    new_task = Task(
-                        task_id=new_task_id,
-                        assigned_agent=decision.next_recommended_agent,
-                        dependencies=[task_to_run.task_id],
-                        input_data={"action": "run"}
-                    )
-                    state.current_tasks.append(new_task)
-                    state.execution_graph["nodes"].append(new_task_id)
-                    state.execution_graph["edges"].append({"from": task_to_run.task_id, "to": new_task_id})
+                if decision.decision == "CONTINUE":
+                    t_run.execution_status = "COMPLETED"
+                    state.task_history[t_run.task_id] = t_res
                     
-                    # Update ConversationAgent dependency so it runs last
-                    for t in state.current_tasks:
-                        if t.assigned_agent == "ConversationAgent":
-                            t.dependencies.append(new_task_id)
-                            state.execution_graph["edges"].append({"from": new_task_id, "to": t.task_id})
-                            
+                    end_event = ExecutionTimelineEvent(
+                        agent_name=t_run.assigned_agent,
+                        action="completed",
+                        duration=t_res.execution_time,
+                        message=f"Task {t_run.task_id} completed successfully. Decision: CONTINUE."
+                    )
+                    state.execution_timeline.append(end_event)
+                    
+                elif decision.decision == "RETRY":
+                    t_run.execution_status = "PENDING"
+                    t_run.retry_count += 1
+                    retries_count += 1
+                    
+                    retry_event = ExecutionTimelineEvent(
+                        agent_name=t_run.assigned_agent,
+                        action="retry",
+                        message=f"Task {t_run.task_id} failed. Retrying (Attempt {t_run.retry_count})."
+                    )
+                    state.execution_timeline.append(retry_event)
+                    
+                elif decision.decision == "SKIP":
+                    t_run.execution_status = "SKIPPED"
+                    state.task_history[t_run.task_id] = t_res
+                    
+                    skip_event = ExecutionTimelineEvent(
+                        agent_name=t_run.assigned_agent,
+                        action="skipped",
+                        message=f"Task {t_run.task_id} skipped by Planner decision."
+                    )
+                    state.execution_timeline.append(skip_event)
+                    
+                elif decision.decision == "INSERT_TASKS":
+                    t_run.execution_status = "COMPLETED"
+                    state.task_history[t_run.task_id] = t_res
+                    
                     insert_event = ExecutionTimelineEvent(
                         agent_name="PlannerAgent",
                         action="insert_tasks",
-                        message=f"Dynamically inserted new task: {new_task_id} assigned to {decision.next_recommended_agent}."
+                        message=f"Planner inserted tasks. Reason: {decision.reasoning}"
                     )
                     state.execution_timeline.append(insert_event)
+                        
+                elif decision.decision == "TERMINATE":
+                    t_run.execution_status = "FAILED"
+                    state.task_history[t_run.task_id] = t_res
+                    state.current_status = "FAILED"
+                    state.errors.append(f"Execution terminated on task {t_run.task_id}. Reason: {decision.reasoning}")
                     
-            elif decision.decision == "TERMINATE":
-                task_to_run.execution_status = "FAILED"
-                state.task_history[task_to_run.task_id] = task_result
-                state.current_status = "FAILED"
-                state.errors.append(f"Execution terminated on task {task_to_run.task_id}. Reason: {decision.reasoning}")
-                
-                term_event = ExecutionTimelineEvent(
-                    agent_name=task_to_run.assigned_agent,
-                    action="terminated",
-                    message=f"Execution terminated due to failure on {task_to_run.task_id}."
-                )
-                state.execution_timeline.append(term_event)
+                    term_event = ExecutionTimelineEvent(
+                        agent_name=t_run.assigned_agent,
+                        action="terminated",
+                        message=f"Execution terminated due to failure on {t_run.task_id}."
+                    )
+                    state.execution_timeline.append(term_event)
+                    should_terminate = True
+                    break
+            
+            if should_terminate:
                 break
 
         # Calculate final metrics and build report
@@ -194,11 +186,8 @@ class ExecutionEngine:
         avg_conf = sum(state.confidence_history) / len(state.confidence_history) if state.confidence_history else 1.0
         state.overall_confidence = avg_conf
         
-        agent_costs = 0.0
-        for t in state.current_tasks:
-            if t.execution_status in ["COMPLETED", "FAILED"] and t.assigned_agent in self.agents:
-                agent_costs += self.agents[t.assigned_agent].metadata.estimated_cost
-                
+        agent_costs = state.planner_learning.get("agent_costs", 0.0)
+        
         report = ExecutionReport(
             goal=state.user_goal,
             status=state.current_status,

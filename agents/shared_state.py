@@ -53,13 +53,70 @@ class TaskResult(BaseModel):
     error_message: Optional[str] = None
     execution_time: float = 0.0
     confidence: float = 1.0
+    risks: List[str] = []
+    recommendations: List[str] = []
+    suggested_follow_up_tasks: List[Dict[str, Any]] = []
+    need_planner_intervention: bool = False
 
 class AgentDecision(BaseModel):
-    decision: str  # "CONTINUE", "RETRY", "SKIP_DOWNSTREAM", "INSERT_TASKS", "TERMINATE"
+    decision: str  # "CONTINUE", "RETRY", "SKIP_DOWNSTREAM", "INSERT_TASKS", "TERMINATE", "SKIP"
     reasoning: str
     confidence: float = 1.0
     alternative_options: List[str] = []
     next_recommended_agent: Optional[str] = None
+
+class Goal(BaseModel):
+    goal_id: str
+    user_intent: str
+    desired_outcome: str
+    success_criteria: List[str] = []
+    current_progress: str = ""
+    completion_percentage: float = 0.0
+    remaining_unknowns: List[str] = []
+    confidence: float = 1.0
+    constraints: List[str] = []
+    assumptions: List[str] = []
+    risks: List[str] = []
+
+class PlanningHypothesis(BaseModel):
+    hypothesis_text: str
+    assumed_steps: List[str] = []
+    expected_dependencies: Dict[str, List[str]] = {}
+    confidence: float = 1.0
+
+class HypothesisRegistry(BaseModel):
+    hypotheses: List[PlanningHypothesis] = []
+    selected_hypothesis_index: int = 0
+    discarded_hypotheses: List[PlanningHypothesis] = []
+
+class Uncertainty(BaseModel):
+    missing_information: List[str] = []
+    incomplete_documents: List[str] = []
+    estimated_values: List[str] = []
+    low_confidence_outputs: List[str] = []
+    conflicting_evidence: List[str] = []
+    unknown_supplier_data: List[str] = []
+
+class Observation(BaseModel):
+    task_id: str
+    result_summary: Dict[str, Any] = {}
+    confidence: float = 1.0
+    duration: float = 0.0
+    unexpected_findings: List[str] = []
+    warnings: List[str] = []
+    risks: List[str] = []
+    recommendations: List[str] = []
+    planner_intervention_advised: bool = False
+    suggested_next_action: str = ""
+
+class DecisionJournalEntry(BaseModel):
+    timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
+    decision: str  # "CONTINUE", "RETRY", "SKIP", "INSERT_TASKS", "TERMINATE"
+    reason: str
+    evidence: str
+    confidence: float = 1.0
+    alternative_considered: List[str] = []
+    expected_outcome: str
 
 class ExecutionTimelineEvent(BaseModel):
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
@@ -83,6 +140,26 @@ class ExecutionState(BaseModel):
     overall_confidence: float = 1.0
     current_status: str = "PENDING"
     
+    # Upgraded Executive Planner models
+    goal_model: Optional[Goal] = None
+    planning_hypothesis: Optional[HypothesisRegistry] = None
+    uncertainty_model: Optional[Uncertainty] = None
+    decision_journal: List[DecisionJournalEntry] = []
+    observations: List[Observation] = []
+    execution_strategy: str = "Maximum Accuracy"
+    reasoning_iterations: int = 0
+    replanning_count: int = 0
+    inserted_tasks_count: int = 0
+    skipped_tasks_count: int = 0
+    estimated_remaining_work: str = "TBD"
+    planner_learning: Dict[str, Any] = Field(default_factory=lambda: {
+        "unreliable_agents": {},
+        "repeated_failures": 0,
+        "missing_supplier_data_counts": 0,
+        "agent_latencies": {},
+        "agent_costs": 0.0
+    })
+
     # Typed worker results stored in execution state
     carbon_results: List[CarbonResult] = []
     compliance_results: List[ComplianceResult] = []

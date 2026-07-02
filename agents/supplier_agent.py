@@ -68,6 +68,10 @@ class SupplierAgent(BaseAgent):
                 # Append to shared state
                 state.supplier_responses.extend(supplier_responses)
                 
+                has_missing = any(r.emission_data_status in ["Missing", "Unknown"] for r in supplier_responses)
+                risks = ["Supplier emissions data missing or unknown, using default averages"] if has_missing else []
+                recs = ["Request direct carbon logs from missing suppliers", "Run supplier verification audit"] if has_missing else []
+                
                 db.close()
                 elapsed = time.time() - start_time
                 return TaskResult(
@@ -75,7 +79,10 @@ class SupplierAgent(BaseAgent):
                     execution_status="COMPLETED",
                     output_data={"supplier_responses": [r.dict() for r in supplier_responses]},
                     execution_time=elapsed,
-                    confidence=0.95
+                    confidence=0.95 if not has_missing else 0.80,
+                    risks=risks,
+                    recommendations=recs,
+                    need_planner_intervention=has_missing
                 )
 
             elif task_type == "get_top_emitter":
