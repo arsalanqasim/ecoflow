@@ -161,6 +161,12 @@ class ExecutionState(BaseModel):
     a2a_audit_trail: List[Any] = Field(default_factory=list)
     a2a_trust_scores: Dict[str, float] = Field(default_factory=dict)
 
+    # Reflection & Self-Correction timeline structures
+    reflection_events: List[Any] = Field(default_factory=list)
+    quality_scores: Dict[str, float] = Field(default_factory=dict)
+    recovery_actions: List[Any] = Field(default_factory=list)
+    reflection_memory: List[Any] = Field(default_factory=list)
+
     user_goal: str
     uploaded_documents: List[str] = []
     current_tasks: List[Task] = []

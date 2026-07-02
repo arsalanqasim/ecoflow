@@ -193,6 +193,29 @@ class ConversationAgent(BaseAgent):
                     answer += f"- *Agreement score:* `{consensus_report['consensus_score']*100:.0f}%`\n"
                     answer += f"- *Recommendation:* `{consensus_report['final_recommendation']}`\n"
 
+            # Append Quality Score Dashboard if present
+            if answer and getattr(state, "quality_scores", None):
+                answer += f"\n**Quality Score Dashboard:**\n"
+                for name, score in state.quality_scores.items():
+                    answer += f"- **{name}:** `{score:.2f}/1.00`\n"
+
+            # Append Self-Reflection & Correction Timeline if present
+            if answer and getattr(state, "reflection_events", None):
+                answer += f"\n**Self-Reflection & Correction Timeline:**\n"
+                for i, evt in enumerate(state.reflection_events, 1):
+                    answer += f"**[{i}] Stage: {evt['stage']}**\n"
+                    if evt.get("detected_failure"):
+                        answer += f"  - *Failure Class:* `{evt['detected_failure']}` (Severity: `{evt['severity']}`)\n"
+                        answer += f"  - *Root Cause:* {evt['root_cause']}\n"
+                    if evt.get("confidence_change"):
+                        bef = evt["confidence_change"]["before"]
+                        aft = evt["confidence_change"]["after"]
+                        if bef != aft:
+                            answer += f"  - *Confidence Recalibration:* `{bef*100:.0f}%` -> `{aft*100:.0f}%` (Goal model updated)\n"
+                    if evt.get("recovery_action"):
+                        answer += f"  - *Recovery Action Recommendation:* `{evt['recovery_action']}`\n"
+                    answer += f"  - *Summary:* {evt['summary']}\n"
+
             if not answer:
                 answer = "Goal execution completed. Please check task results for details."
 

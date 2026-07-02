@@ -216,6 +216,7 @@ class PlannerAgent(BaseAgent):
     def evaluate_task_result(self, state: ExecutionState, task: Task, result: TaskResult) -> AgentDecision:
         logger.info(f"Executive evaluation for task {task.task_id} (status: {result.execution_status})")
         state.reasoning_iterations += 1
+        state.task_history[task.task_id] = result
         
         # 1. Compile Observation
         observation = Observation(
@@ -234,6 +235,100 @@ class PlannerAgent(BaseAgent):
 
         # Update reputation
         self._update_agent_reputation(state, task, result)
+
+        # 1.5. Trigger Autonomous Self-Reflection Layer for non-trivial tasks
+        if result.execution_status in ["COMPLETED", "FAILED"] and task.assigned_agent not in ["ReflectionAgent", "ConversationAgent", "PlannerAgent"]:
+            from agents.reflection_agent import ReflectionAgent
+            ref_agent = ReflectionAgent()
+            ref_agent.llm_reason = self.llm_reason
+            
+            # Choose reflection stage
+            stage = "Consensus" if task.task_id in ["run_consensus", "run_consensus_retry"] else "Task"
+            ref_task = Task(
+                task_id=f"reflection_{task.task_id}_{len(state.reflection_events)}",
+                assigned_agent="ReflectionAgent",
+                input_data={"stage": stage, "target_task_id": task.task_id}
+            )
+            ref_res = ref_agent.execute(state, ref_task)
+            state.task_history[ref_task.task_id] = ref_res
+            
+            # Evaluate recovery recommendation from reflection
+            ref_report = ref_res.output_data.get("reflection_report", {})
+            rec_action = ref_report.get("recovery_recommendation")
+            
+            if rec_action == "Insert New Task" and ref_report.get("suggested_recovery_details"):
+                rec_details = ref_report["suggested_recovery_details"]
+                action_name = rec_details.get("action")
+                
+                # Dynamic Recovery: Verify Supplier B Cert Status
+                if action_name == "verify_supplier_b_cert" and not any(t.task_id == "ca_verification_supplier_b" for t in state.current_tasks):
+                    # Set current run_consensus task result to COMPLETED to satisfy engine/DAG requirements
+                    result.execution_status = "COMPLETED"
+                    state.task_history[task.task_id] = result
+                    
+                    ca_task = Task(
+                        task_id="ca_verification_supplier_b",
+                        assigned_agent="CertificationAgent",
+                        dependencies=[task.task_id],
+                        priority=4,
+                        validation_rules=["has certification_status"],
+                        expected_outputs=["certification_status"],
+                        input_data={"action": "verify_supplier_certification", "supplier_name": "Supplier B Corp"}
+                    )
+                    state.current_tasks.append(ca_task)
+                    state.inserted_tasks_count += 1
+                    
+                    # Log recovery action to state.recovery_actions
+                    state.recovery_actions.append({
+                        "timestamp": time.time(),
+                        "trigger_task": task.task_id,
+                        "recovery_task": "ca_verification_supplier_b",
+                        "reason": ref_report.get("concise_reasoning"),
+                        "action_details": rec_details
+                    })
+                    
+                    # Insert retry consensus task
+                    retry_consensus = Task(
+                        task_id="run_consensus_retry",
+                        assigned_agent="SupplierAgent",
+                        dependencies=["ca_verification_supplier_b"],
+                        priority=5,
+                        validation_rules=["has consensus_report"],
+                        expected_outputs=["consensus_report"],
+                        input_data={"action": "run_consensus"}
+                    )
+                    state.current_tasks.append(retry_consensus)
+                    
+                    state.execution_graph["nodes"].append("ca_verification_supplier_b")
+                    state.execution_graph["nodes"].append("run_consensus_retry")
+                    state.execution_graph["edges"].append({"from": task.task_id, "to": "ca_verification_supplier_b"})
+                    state.execution_graph["edges"].append({"from": "ca_verification_supplier_b", "to": "run_consensus_retry"})
+                    
+                    # Rewire downstream tasks
+                    for t in state.current_tasks:
+                        if t.task_id == "run_calc":
+                            if "run_consensus" in t.dependencies:
+                                t.dependencies.remove("run_consensus")
+                            t.dependencies.append("run_consensus_retry")
+                            state.execution_graph["edges"].append({"from": "run_consensus_retry", "to": "run_calc"})
+                            
+                    return AgentDecision(
+                        decision="INSERT_TASKS",
+                        reasoning=f"Self-Reflection identified weak consensus evidence. Injected CA ISO verification task for Supplier B. Details: {ref_report.get('concise_reasoning')}",
+                        next_recommended_agent="CertificationAgent"
+                    )
+
+        elif result.execution_status in ["COMPLETED"] and task.task_id == "generate_response":
+            from agents.reflection_agent import ReflectionAgent
+            ref_agent = ReflectionAgent()
+            ref_agent.llm_reason = self.llm_reason
+            ref_task = Task(
+                task_id=f"reflection_{task.task_id}_{len(state.reflection_events)}",
+                assigned_agent="ReflectionAgent",
+                input_data={"stage": "Final", "target_task_id": task.task_id}
+            )
+            ref_res = ref_agent.execute(state, ref_task)
+            state.task_history[ref_task.task_id] = ref_res
 
         # 2. Accumulate Learning
         if result.execution_status == "FAILED":
